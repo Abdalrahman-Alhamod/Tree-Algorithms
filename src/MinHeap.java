@@ -1,98 +1,173 @@
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class MinHeap extends Heap {
-    public void minHeapifyTopDown(ArrayList<Integer> array, int elementsNumber, int index) {
-        // because The Tree Is Complete :
-        // Time Complexity : O(log(n))
+/**
+ * A class representing a minimum heap data structure.
+ *
+ * @param <T> the type of elements stored in the heap
+ */
+public class MinHeap<T extends Comparable<T>> extends Heap<T> {
+
+    /**
+     * Constructs a new empty minimum heap.
+     */
+    public MinHeap() {
+        super();
+    }
+
+    /**
+     * Constructs a new minimum heap with the given array of elements.
+     *
+     * @param heapArray the array of elements to initialize the heap with
+     */
+    public MinHeap(ArrayList<T> heapArray) {
+        super(heapArray);
+        buildMinHeapArray(heapArray);
+    }
+
+    /**
+     * Heapify an element at the given index in the heap in a top-down manner.
+     *
+     * @param index the index of the element to heapify
+     */
+    protected void heapifyTopDown(int index) {
         int smallest = index;
-        int right = rightSonIndex(index);
-        int left = leftSonIndex(index);
-        if (left <= elementsNumber && array.get(left) < array.get(smallest))
+        int right = getRightChildIndex(index);
+        int left = getLeftChildIndex(index);
+        if (heapArray.get(smallest) != null && left <= heapSize && heapArray.get(left).compareTo(heapArray.get(smallest)) < 0)
             smallest = left;
-        if (right <= elementsNumber && array.get(right) < array.get(smallest))
+        if (heapArray.get(smallest) != null && right <= heapSize && heapArray.get(right).compareTo(heapArray.get(smallest)) < 0)
             smallest = right;
         if (smallest != index) {
-            swap(array, index, smallest);
-            minHeapifyTopDown(array, elementsNumber, smallest);
+            swap(index, smallest);
+            heapifyTopDown(smallest);
         }
     }
 
-
-    public void insert(int element) {
-        if (heapArray.size() > (heapSize + 1))
-            heapArray.set(heapSize + 1, element);
-        else
-            heapArray.add(element);
+    /**
+     * Insert an element into the heap.
+     *
+     * @param element the element to be inserted
+     */
+    public void insert(T element) {
+        heapArray.add(element);
         heapSize++;
-        minHeapifyBottomUp(heapSize);
+        heapifyBottomUp(heapSize);
     }
 
-    private void minHeapifyBottomUp(int index) {
-        if (index != 1 && heapArray.get(index) < heapArray.get(parentIndex(index))) {
-            swap(heapArray, index, parentIndex(index));
-            minHeapifyBottomUp(parentIndex(index));
+    /**
+     * Heapify an element at the given index in the heap in a bottom-up manner.
+     *
+     * @param index the index of the element to heapify
+     */
+    protected void heapifyBottomUp(int index) {
+        if (index != 1 && heapArray.get(index).compareTo(heapArray.get(getParentIndex(index))) < 0) {
+            swap(index, getParentIndex(index));
+            heapifyBottomUp(getParentIndex(index));
         }
     }
 
-    public int search(int element) {
+    /**
+     * Search for an element in the heap and return its index.
+     *
+     * @param element the element to search for
+     * @return the index of the element, or -1 if it is not found
+     */
+    public int search(T element) {
         for (int i = 1; i <= heapSize; i++) {
-            if (element == heapArray.get(i))
+            if (element.equals(heapArray.get(i)))
                 return i;
         }
         return -1;
     }
 
+    /**
+     * Removes the minimum element from the heap and returns it.
+     *
+     * @return the minimum element in the heap, or null if the heap is empty
+     */
+    @Override
+    public T remove() {
+        if (heapSize == 0) {
+            return null;
+        }
+
+        // Save the minimum element to be returned later
+        T minElement = heapArray.get(1);
+
+        // Replace the minimum element with the last element in the heap
+        heapArray.set(1, heapArray.get(heapSize));
+        heapSize--;
+
+        // Heapify the root element down to maintain the heap property
+        heapifyTopDown(1);
+
+        return minElement;
+    }
+
+    /**
+     * Delete an element from the heap.
+     *
+     * @param index the index of the element to be deleted
+     */
     public void delete(int index) {
         if (index <= 0 || index > heapSize)
             return;
         heapArray.set(index, heapArray.get(heapSize));
         heapSize--;
-        if (index != 1 && heapArray.get(index) < heapArray.get(parentIndex(index)))
-            minHeapifyBottomUp(index);
+        if (index != 1 && heapArray.get(index).compareTo(heapArray.get(getParentIndex(index))) < 0)
+            heapifyBottomUp(index);
         else
-            minHeapifyTopDown(heapArray, heapSize, index);
+            heapifyTopDown(index);
     }
 
-    public void buildMinHeap() {
-        Scanner in = new Scanner(System.in);
-        System.out.print("Enter Number Of Elements : ");
-        int n = in.nextInt(), element;
-        ArrayList<Integer> array = new ArrayList<>(n + 1);
-        System.out.print("Enter Elements : ");
-        array.add(0);
-        for (int i = 1; i <= n; i++) {
-            element = in.nextInt();
-            array.add(element);
-        }
+    /**
+     * Build a minimum heap from the given array of elements.
+     *
+     * @param array the array of elements to build the heap from
+     */
+    public void buildMinHeapArray(ArrayList<T> array) {
         heapSize = array.size() - 1;
-        heapArray = array;
-        buildMinHeapArray(heapArray);
-        printHeapArray();
-    }
-
-    public void buildMinHeapArray(ArrayList<Integer> array) {
-        // Time Complexity : O(nlog(n))
-        for (int i = array.size() / 2; i >= 1; i--) {
-            minHeapifyTopDown(heapArray, heapSize, i);
+        for (int i = heapSize / 2; i >= 1; i--) {
+            heapifyTopDown(i);
         }
     }
 
-    public ArrayList<Integer> HeapSortDescending(ArrayList<Integer> array) {
+    /**
+     * Sort the elements of the heap in descending order using heap sort.
+     *
+     * @return the sorted array of elements
+     */
+    public ArrayList<T> heapSort(ArrayList<T> array) {
         // Time Complexity : O(nlog(n))
         buildMinHeapArray(array);
-        int elementsNumber = array.size() - 1;
-        for (int i = array.size() - 1; i >= 2; i--) {
-            swap(array, 1, i);
+        int elementsNumber = heapSize;
+        for (int i = array.size() - 1; i >= 1; i--) {
+            swap(array, 0, i);
             elementsNumber--;
-            minHeapifyTopDown(array, elementsNumber, 1);
+            heapifyTopDown(0);
         }
         return array;
     }
 
-    public void HandleInputChoices(MinHeap heap) {
+    /**
+     * This method swaps two elements in an ArrayList.
+     *
+     * @param array the ArrayList containing the elements to be swapped
+     * @param i     the index of the first element
+     * @param j     the index of the second element
+     */
+    private void swap(ArrayList<T> array, int i, int j) {
+        T temp = array.get(i);
+        array.set(i, array.get(j));
+        array.set(j, temp);
+    }
+
+    /**
+     * Handle the user's choice of operation on the heap.
+     */
+    public void handleChoices(MinHeap heap) {
         Scanner in = new Scanner(System.in);
-        buildMinHeap();
         int choice;
         boolean input = false;
         while (!input) {
@@ -102,57 +177,49 @@ public class MinHeap extends Heap {
                     + "\n 3- Print Heap Sort Descending Array"
                     + "\n 4- Insert An Element"
                     + "\n 5- Delete An Element"
-                    + "\n-1- Back"
-                    + "\n 0- Exit"
-                    + "\nCommand :");
+                    + "\n6- Search for an Element"
+                    + "\n 7- Exit"
+                    + "\nChoice: ");
             choice = in.nextInt();
             switch (choice) {
-                case 1: {
-                    printHeapArray();
+                case 1:
+                    heap.printHeapArray();
                     break;
-                }
-                case 2: {
-                    printHeapTree();
+                case 2:
+                    heap.printHeapTree();
                     break;
-                }
-                case 3: {
-                    ArrayList<Integer> sorted = new ArrayList<>();
-                    for (int i = 0; i <= heapSize; i++) {
-                        sorted.add(heapArray.get(i));
-                    }
-                    System.out.println("Heap Sort Array : " + HeapSortDescending(sorted));
+                case 3:
+                    ArrayList<T> sorted = new ArrayList<>(heap.heapArray.subList(1, heap.heapSize + 1));
+                    System.out.println("Heap Sort Array : " + heapSort(sorted));
                     break;
-                }
-                case 4: {
-                    System.out.print("Enter Element You Want To Add : ");
+                case 4:
+                    System.out.print("Enter element to insert: ");
                     int element = in.nextInt();
-                    insert(element);
-                    printHeapArray();
+                    heap.insert(element);
+                    System.out.println("Element " + element + " inserted into the heap.");
                     break;
-                }
-                case 5: {
-                    System.out.print("Enter Element You Want To Delete : ");
-                    int element = in.nextInt();
-                    int index = search(element);
-                    if (index != -1) {
-                        delete(index);
-                        printHeapArray();
+                case 5:
+                    System.out.print("Enter index of element to delete: ");
+                    int index = in.nextInt();
+                    heap.delete(index);
+                    System.out.println("Element at index " + index + " deleted from the heap.");
+                    break;
+                case 6:
+                    System.out.print("Enter element to search for: ");
+                    int elementToSearch = in.nextInt();
+                    int indexFound = heap.search(elementToSearch);
+                    if (indexFound != -1) {
+                        System.out.println("Element " + elementToSearch + " found at index " + indexFound + ".");
                     } else {
-                        printHeapArray();
-                        System.out.println("The Element Was Not Found!");
+                        System.out.println("Element " + elementToSearch + " not found in the heap.");
                     }
                     break;
-                }
-                case -1: {
+                case 7:
                     input = true;
+                    System.out.println("Exiting program.");
                     break;
-                }
-                case 0: {
-                    System.exit(0);
-                    break;
-                }
-                default: {
-                }
+                default:
+                    System.out.println("Invalid input. Please try again.");
             }
         }
     }

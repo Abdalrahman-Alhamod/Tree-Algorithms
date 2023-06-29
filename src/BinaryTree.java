@@ -1,862 +1,871 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Stack;
+import java.util.function.Consumer;
 
-public abstract class BinaryTree implements Tree {
-    Node root;
-    private Vector<Node> PreTreeVector;
+/**
+ * A binary tree implementation of the Tree interface.
+ *
+ * @param <T> the type of elements stored in the tree
+ */
+public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
 
+    protected Node<T> root; // The root node of the tree
+    protected int size; // The number of nodes in the tree
+
+    /**
+     * Constructs a new binary tree with no elements.
+     */
     public BinaryTree() {
         root = null;
+        size = 0;
     }
 
-    public BinaryTree(Node root) {
-        this.root = root;
+    @Override
+    public boolean contains(T value) {
+        return find(value) != null;
     }
 
-    public boolean isStrict(Node node) {
-        if (node == null)
-            return true;
-        if ((node.left != null && node.right != null) || (node.left == null && node.right == null))
-            return isStrict(node.left) && isStrict(node.right);
-        return false;
+    /**
+     * Finds the node with the specified value in the tree.
+     *
+     * @param value the value to search for
+     * @return the node with the specified value, or null if it is not found
+     */
+    @Override
+    public Node<T> find(T value) {
+        return find(root, value);
     }
 
-    public boolean isComplete(Node node) {
+    /**
+     * Recursive helper method for finding the node with the specified value in the tree.
+     *
+     * @param node  the root node of the current subtree
+     * @param value the value to search for
+     * @return the node with the specified value in the subtree, or null if it is not found
+     */
+    private Node<T> find(Node<T> node, T value) {
         if (node == null) {
+            return null;
+        } else if (node.getValue().equals(value)) {
+            return node;
+        } else {
+            Node<T> left = find(node.getLeft(), value);
+            Node<T> right = find(node.getRight(), value);
+            if (left != null) {
+                return left;
+            } else if (right != null) {
+                return right;
+            } else {
+                return null;
+            }
+        }
+    }
+
+    /**
+     * Counts the number of occurrences of the specified value in the tree.
+     *
+     * @param value the value to count
+     * @return the number of occurrences of the value in the tree
+     */
+    @Override
+    public int count(T value) {
+        return count(root, value);
+    }
+
+    /**
+     * Recursive helper method for counting the number of occurrences of the specified value in the tree.
+     *
+     * @param node  the root node of the current subtree
+     * @param value the value to count
+     * @return the number of occurrences of the value in the subtree
+     */
+    private int count(Node<T> node, T value) {
+        if (node == null) {
+            return 0;
+        } else {
+            int count = 0;
+            if (node.getValue().equals(value)) {
+                count++;
+            }
+            count += count(node.getLeft(), value);
+            count += count(node.getRight(), value);
+            return count;
+        }
+    }
+
+    /**
+     * Performs a pre-order traversal of the tree and applies the specified action to each node.
+     *
+     * @param action the action to apply to each node
+     */
+    @Override
+    public void preOrder(Consumer<T> action) {
+        preOrder(root, action);
+    }
+
+    private void preOrder(Node<T> node, Consumer<T> action) {
+        if (node != null) {
+            action.accept(node.getValue());
+            preOrder(node.getLeft(), action);
+            preOrder(node.getRight(), action);
+        }
+    }
+
+    /**
+     * Performs an in-order traversal of the tree and applies the specified action to each node.
+     *
+     * @param action the action to apply to each node
+     */
+    @Override
+    public void inOrder(Consumer<T> action) {
+        inOrder(root, action);
+    }
+
+    private void inOrder(Node<T> node, Consumer<T> action) {
+        if (node != null) {
+            inOrder(node.getLeft(), action);
+            action.accept(node.getValue());
+            inOrder(node.getRight(), action);
+        }
+    }
+
+    /**
+     * Performs a post-order traversal of the tree and applies the specified action to each node.
+     *
+     * @param action the action to apply to each node
+     */
+    @Override
+    public void postOrder(Consumer<T> action) {
+        postOrder(root, action);
+    }
+
+    private void postOrder(Node<T> node, Consumer<T> action) {
+        if (node != null) {
+            postOrder(node.getLeft(), action);
+            postOrder(node.getRight(), action);
+            action.accept(node.getValue());
+        }
+    }
+
+    /**
+     * Returns the maximum depth of the tree.
+     *
+     * @return the maximum depth of the tree
+     */
+    @Override
+    public int getDepth() {
+        return getDepth(root);
+    }
+
+    private int getDepth(Node<T> node) {
+        if (node == null) {
+            return -1;
+        }
+        int leftDepth = getDepth(node.getLeft());
+        int rightDepth = getDepth(node.getRight());
+        return Math.max(leftDepth, rightDepth) + 1;
+    }
+
+    /**
+     * Prints a graphical representation of the tree to standard output.
+     */
+    @Override
+    public void printTree() {
+        printTree(root, 0);
+    }
+
+    private void printTree(Node<T> node, int indent) {
+        if (node != null) {
+            printTree(node.getRight(), indent + 4);
+            System.out.printf("%" + indent + "s%s%n", "", node.getValue());
+            printTree(node.getLeft(), indent + 4);
+        }
+    }
+
+    /**
+     * Searches the tree for a node with the specified value and returns it.
+     *
+     * @param value the value to search for
+     * @return the node with the specified value, or null if it is not found
+     */
+    @Override
+    public Node<T> search(T value) {
+        Stack<Node<T>> stack = new Stack<>();
+        stack.push(root);
+        while (!stack.isEmpty()) {
+            Node<T> node = stack.pop();
+            if (node.getValue().equals(value)) {
+                return node;
+            } else {
+                if (node.getLeft() != null) {
+                    stack.push(node.getLeft());
+                }
+                if (node.getRight() != null) {
+                    stack.push(node.getRight());
+                }
+            }
+        }
+        return null;
+    }
+
+
+    /**
+     * Returns the node with the minimum value in the tree.
+     *
+     * @return the node with the minimum value in the tree, or null if the tree is empty
+     */
+    @Override
+    public Node<T> getMin() {
+        if (root == null) {
+            return null;
+        }
+        return getMin(root);
+    }
+
+    /**
+     * Recursive helper method for finding the node with the minimum value in the tree.
+     *
+     * @param node the root node of the current subtree
+     * @return the node with the minimum value in the subtree, or null if the subtree is empty
+     */
+    private Node<T> getMin(Node<T> node) {
+        if (node == null) {
+            return null;
+        } else {
+            Node<T> left = getMin(node.getLeft());
+            Node<T> right = getMin(node.getRight());
+            Node<T> min = node;
+            if (left != null && left.getValue().compareTo(min.getValue()) < 0) {
+                min = left;
+            }
+            if (right != null && right.getValue().compareTo(min.getValue()) < 0) {
+                min = right;
+            }
+            return min;
+        }
+    }
+
+    /**
+     * Returns the node with the maximum value in the tree.
+     *
+     * @return the node with the maximum value in the tree, or null if the tree is empty
+     */
+    @Override
+    public Node<T> getMax() {
+        if (root == null) {
+            return null;
+        }
+        return getMax(root);
+    }
+
+    /**
+     * Recursive helper method for finding the node with the maximum value in the tree.
+     *
+     * @param node the root node of the current subtree
+     * @return the node with the maximum value in the subtree, or null if the subtree is empty
+     */
+    private Node<T> getMax(Node<T> node) {
+        if (node == null) {
+            return null;
+        } else {
+            Node<T> left = getMax(node.getLeft());
+            Node<T> right = getMax(node.getRight());
+            Node<T> max = node;
+            if (left != null && left.getValue().compareTo(max.getValue()) > 0) {
+                max = left;
+            }
+            if (right != null && right.getValue().compareTo(max.getValue()) > 0) {
+                max = right;
+            }
+            return max;
+        }
+    }
+
+    /**
+     * Inserts a new node with the specified value into the tree.
+     *
+     * @param value the value to insert
+     * @return true if the value was inserted, or false if it already exists in the tree
+     */
+    @Override
+    public boolean insert(T value) {
+        Node<T> newNode = new Node<>(value);
+
+        // If the tree is empty, set the root node to be the new node
+        if (root == null) {
+            root = newNode;
+            size++;
             return true;
         }
-        Queue<Node> queue = new LinkedList<>();
-        boolean isNonFullNodeSeen = false;
-        queue.offer(node);
-        while (!queue.isEmpty()) {
-            Node curr = queue.poll();
-            if (curr.left != null) {
-                if (isNonFullNodeSeen) {
-                    return false;
+
+        // Traverse the tree to find the correct position to insert the new node
+        Node<T> current = root;
+        while (true) {
+            int cmp = current.getValue().compareTo(value);
+            if (cmp == 0) {
+                // The value already exists in the tree, so return false
+                return false;
+            } else if (cmp > 0) {
+                // The value is less than the current node's value, so move to the left subtree
+                if (current.getLeft() == null) {
+                    current.setLeft(newNode);
+                    break;
+                } else {
+                    current = current.getLeft();
                 }
-                queue.offer(curr.left);
             } else {
-                isNonFullNodeSeen = true;
-            }
-            if (curr.right != null) {
-                if (isNonFullNodeSeen) {
-                    return false;
+                // The value is greater than the current node's value, so move to the right subtree
+                if (current.getRight() == null) {
+                    current.setRight(newNode);
+                    break;
+                } else {
+                    current = current.getRight();
                 }
-                queue.offer(curr.right);
-            } else {
-                isNonFullNodeSeen = true;
             }
         }
+
+        // Increment the size of the tree and return true
+        size++;
         return true;
     }
 
-    public boolean isFull(Node node) {
-        return size(node) == getMaxNodes(node);
+    /**
+     * Removes the node with the specified value from the tree.
+     *
+     * @param value the value to remove
+     * @return true if the node was found and removed, false otherwise
+     */
+    @Override
+    public boolean delete(T value) {
+        Node<T> parent = null;
+        Node<T> current = root;
+        while (current != null) {
+            int cmp = current.getValue().compareTo(value);
+            if (cmp == 0) {
+                // The node has been found, so remove it
+                if (current.getLeft() == null && current.getRight() == null) {
+                    // Case 1: node has no children
+                    if (parent == null) {
+                        root = null;
+                    } else if (parent.getLeft() == current) {
+                        parent.setLeft(null);
+                    } else {
+                        parent.setRight(null);
+                    }
+                } else if (current.getLeft() == null) {
+                    // Case 2: node has one child (right)
+                    if (parent == null) {
+                        root = current.getRight();
+                    } else if (parent.getLeft() == current) {
+                        parent.setLeft(current.getRight());
+                    } else {
+                        parent.setRight(current.getRight());
+                    }
+                } else if (current.getRight() == null) {
+                    // Case 2: node has one child (left)
+                    if (parent == null) {
+                        root = current.getLeft();
+                    } else if (parent.getLeft() == current) {
+                        parent.setLeft(current.getLeft());
+                    } else {
+                        parent.setRight(current.getLeft());
+                    }
+                } else {
+                    // Case 3: node has two children
+                    Node<T> successor = getSuccessor(current);
+                    current.setValue(successor.getValue());
+                    delete(successor.getValue());
+                }
+                size--;
+                return true;
+            } else if (cmp > 0) {
+                // The value to be deleted is less than the value at the current node, so move to the left subtree
+                parent = current;
+                current = current.getLeft();
+            } else {
+                // The value to be deleted is greater than the value at the current node, so move to the right subtree
+                parent = current;
+                current = current.getRight();
+            }
+        }
+        // The value to be deleted was not found in the tree
+        return false;
     }
 
-    int size(Node node) {
-        if (node == null)
-            return 0;
-        return 1 + size(node.left) + size(node.right);
-    }
-
-    public int getMaxLevel(Node node) {
+    /**
+     * Finds the successor of the specified node in the tree.
+     *
+     * @param node the node to find the successor of
+     * @return the successor of the node
+     */
+    public Node<T> getSuccessor(Node<T> node) {
         if (node == null) {
-            return 0;
-        }
-        return Math.max(getMaxLevel(node.left), getMaxLevel(node.right)) + 1;
-    }
-
-    public int getHeight(Node node) {
-        if (node == null) {
-            return -1;
-        }
-        return Math.max(getHeight(node.left), getHeight(node.right)) + 1;
-    }
-
-    public int getMaxHeight(Node node) {
-        return size(node) - 1;
-    }
-
-    public int getMinHeight(Node node) {
-        return (int) Math.floor(Math.log(size(node)));
-    }
-
-    public int getMaxNodes(Node node) {
-        return (1 << (getHeight(node) + 1)) - 1;
-    }
-
-    public int getMinNodes(Node node) {
-        return getHeight(node) + 1;
-    }
-
-    public int countNodesCompleteBT(Node node) {
-        // Complexity : O(h) But Complete Binary Tree => h = log(n)
-        // ==> Complexity : O(log(n))
-        if (node == null)
-            return 0;
-        int leftHeight = leftHeight(node);
-        int rightHeight = rightHeight(node);
-        if (leftHeight == rightHeight)
-            return (1 << (leftHeight + 1)) - 1;
-        else
-            return 1 + countNodesCompleteBT(node.left) + countNodesCompleteBT(node.right);
-
-    }
-
-    private int leftHeight(Node node) {
-        if (node == null)
-            return -1;
-        return 1 + leftHeight(node.left);
-    }
-
-    private int rightHeight(Node node) {
-        if (node == null)
-            return -1;
-        return 1 + rightHeight(node.right);
-    }
-
-    public int countLeaves(Node node) {
-        if (node == null)
-            return 0;
-        if (node.left == null && node.right == null)
-            return 1;
-        return countLeaves(node.left) + countLeaves(node.right);
-    }
-
-    public int countNonLeaves(Node node) {
-        if (node == null || (node.left == null && node.right == null))
-            return 0;
-        return 1 + countNonLeaves(node.right) + countNonLeaves(node.left);
-    }
-
-    public boolean isBST(Node node) {
-        Node min = new Node(Integer.MIN_VALUE);
-        Node max = new Node(Integer.MAX_VALUE);
-        return isBSTHelper(node, min, max);
-    }
-
-    private boolean isBSTHelper(Node node, Node left, Node right) {
-        // Complexity : O(n)
-        if (node == null)
-            return true;
-        if (left != null && node.value <= left.value)
-            return false;
-        if (right != null && node.value >= right.value)
-            return false;
-        return isBSTHelper(node.left, left, node) && isBSTHelper(node.right, node, right);
-    }
-
-    public boolean check(Node node, int data) {
-        if (node == null)
-            return false;
-        if (node.value == data)
-            return true;
-        return check(node.left, data) || check(node.right, data);
-    }
-
-    public Node find(Node node, int data) {
-        if (node == null || node.value == data)
-            return node;
-        Node founded = find(node.left, data);
-        if (founded == null)
-            return find(node.right, data);
-        else
-            return founded;
-    }
-
-    public int count(Node node, int data) {
-        if (node == null)
-            return 0;
-        if (node.value == data)
-            return count(node.right, data) + count(node.left, data) + 1;
-        else
-            return count(node.right, data) + count(node.left, data);
-    }
-
-    public void preOrder(Node node) {
-        if (node != null) {
-            System.out.print(node.value + " ");
-            preOrder(node.left);
-            preOrder(node.right);
-        }
-    }
-
-    public void inOrder(Node node) {
-        if (node != null) {
-            inOrder(node.left);
-            System.out.print(node.value + " ");
-            inOrder(node.right);
-        }
-    }
-
-    public void postOrder(Node node) {
-        if (node != null) {
-            postOrder(node.left);
-            postOrder(node.right);
-            System.out.print(node.value + " ");
-        }
-    }
-
-    public void AddRoot(int data) {
-        Node son = new Node(data);
-        if (root != null) {
-            son.right = root.right;
-            son.left = root.left;
-            if (root.left != null)
-                root.left.parent = son;
-            if (root.right != null)
-                root.right.parent = son;
-        }
-        root = son;
-    }
-
-    public void buildBalanced(int level) {
-        int p = 1 << level;
-        p /= 2;
-        Node node;
-        node = new Node(p, null, null);
-        insert(node);
-        int dif = p;
-        buildHelper(node, dif / 2);
-    }
-
-    private void buildHelper(Node node, int dif) {
-        if (node != null && dif != 0) {
-            insert(new Node(node.value - dif, null, null));
-            buildHelper(node.left, dif / 2);
-            insert(new Node(node.value + dif, null, null));
-            buildHelper(node.right, dif / 2);
-        }
-    }
-
-    static int preIndex = 0;
-
-    public Node buildTreeInPre(int[] in, int[] pre, int inStart, int inEnd) {
-
-        if (inStart > inEnd)
             return null;
-
-        Node node = new Node(pre[preIndex++], null, null);
-
-        if (inStart == inEnd)
-            return node;
-
-        int inIndex = searchElement(in, inStart, inEnd, node.value);
-
-        node.left = buildTreeInPre(in, pre, inStart, inIndex - 1);
-
-        if (node.left != null)
-            node.left.parent = node;
-
-        node.right = buildTreeInPre(in, pre, inIndex + 1, inEnd);
-
-        if (node.right != null)
-            node.right.parent = node;
-
-        return node;
-    }
-
-    private int searchElement(int[] a, int iStart, int iEnd, int element) {
-        int i;
-        for (i = iStart; i <= iEnd; i++) {
-            if (a[i] == element)
-                break;
         }
-        return i;
-    }
-
-    private void makeFullTree(Node root) {
-        int height = getMaxLevel(root);
-        makeFullTreeHelper(root, height);
-    }
-
-    private void makeFullTreeHelper(Node node, int height) {
-        if (node == null || height == 1) {
-            return;
+        if (node.getRight() != null) {
+            // If the node has a right subtree, the successor is the node with the minimum value in that subtree
+            Node<T> current = node.getRight();
+            while (current.getLeft() != null) {
+                current = current.getLeft();
+            }
+            return current;
+        } else {
+            // If the node does not have a right subtree, we need to go up the tree until we find the first ancestor that is a left child of its parent
+            Node<T> current = node;
+            Node<T> parent = node.getParent();
+            while (parent != null && current == parent.getRight()) {
+                current = parent;
+                parent = parent.getParent();
+            }
+            return parent;
         }
-        if (node.left == null && node.right == null) {
-            // If the node is a leaf, add left and right children as 0
-            node.left = new Node(0, null, null);
-            node.right = new Node(0, null, null);
-        } else if (node.left == null) {
-            // If the node has only a right child, add a left child as 0
-            node.left = new Node(0, null, null);
-        } else if (node.right == null) {
-            // If the node has only a left child, add a right child as 0
-            node.right = new Node(0, null, null);
-        }
-        makeFullTreeHelper(node.left, height - 1);
-        makeFullTreeHelper(node.right, height - 1);
     }
 
-    public void printTree(Node root) {
+    /**
+     * Finds the predecessor of the specified node in the tree.
+     *
+     * @param node the node to find the predecessor of
+     * @return the predecessor of the node
+     */
+    public Node<T> getPredecessor(Node<T> node) {
+        if (node == null) {
+            return null;
+        }
+        if (node.getLeft() != null) {
+            // If the node has a left subtree, the predecessor is the node with the maximum value in that subtree
+            Node<T> current = node.getLeft();
+            while (current.getRight() != null) {
+                current = current.getRight();
+            }
+            return current;
+        } else {
+            // If the node does not have a left subtree, we need to go up the tree until we find the first ancestor that is a right child of its parent
+            Node<T> current = node;
+            Node<T> parent = node.getParent();
+            while (parent != null && current == parent.getLeft()) {
+                current = parent;
+                parent = parent.getParent();
+            }
+            return parent;
+        }
+    }
+
+    /**
+     * Returns the number of nodes in the tree.
+     *
+     * @return the number of nodes in the tree
+     */
+    public int size() {
+        return countNodes(root);
+    }
+
+    /**
+     * Counts the number of nodes in the subtree rooted at the given node.
+     *
+     * @param node the root of the subtree
+     * @return the number of nodes in the subtree
+     */
+    private int countNodes(Node<T> node) {
+        if (node == null) {
+            return 0;
+        }
+        return 1 + countNodes(node.getLeft()) + countNodes(node.getRight());
+    }
+
+    /**
+     * Returns true if the binary tree is strict, i.e., every node in the tree has either two children or no children.
+     * Returns false otherwise.
+     *
+     * @return true if the binary tree is strict, false otherwise
+     */
+    public boolean isStrict() {
+        return isStrict(root);
+    }
+
+    /**
+     * Returns true if the binary tree rooted at the specified node is strict, i.e., every node in the subtree rooted at
+     * the node has either two children or no children. Returns false otherwise.
+     *
+     * @param node the root of the subtree to check
+     * @return true if the subtree is strict, false otherwise
+     */
+    private boolean isStrict(Node<T> node) {
+        if (node == null) {
+            // An empty tree is trivially strict
+            return true;
+        } else if (node.getLeft() == null && node.getRight() == null) {
+            // A leaf node is also strict
+            return true;
+        } else if (node.getLeft() != null && node.getRight() != null) {
+            // A node with two children is strict if both its children are strict
+            return isStrict(node.getLeft()) && isStrict(node.getRight());
+        } else {
+            // A node with only one child is not strict
+            return false;
+        }
+    }
+
+
+    /**
+     * Returns true if the binary tree is complete, i.e., all levels of the tree are completely filled except possibly
+     * the last level, which is filled from left to right. Returns false otherwise.
+     *
+     * @return true if the binary tree is complete, false otherwise
+     */
+    public boolean isComplete() {
+        return isComplete(root, 0, size);
+    }
+
+    /**
+     * Returns true if the binary tree rooted at the specified node is complete, i.e., all levels of the subtree rooted
+     * at the node are completely filled except possibly the last level, which is filled from left to right. Returns
+     * false otherwise.
+     *
+     * @param node    the root of the subtree to check
+     * @param index   the index of the node in the tree, starting from 0 for the root
+     * @param maxsize the maximum number of nodes that can be in the subtree, including the root
+     * @return true if the subtree is complete, false otherwise
+     */
+    private boolean isComplete(Node<T> node, int index, int maxsize) {
+        if (node == null) {
+            // An empty tree is trivially complete
+            return true;
+        }
+        if (index >= maxsize) {
+            // The node is beyond the maximum allowed index, so the tree is not complete
+            return false;
+        }
+        // Recursively check the left and right subtrees
+        return isComplete(node.getLeft(), 2 * index + 1, maxsize)
+                && isComplete(node.getRight(), 2 * index + 2, maxsize);
+    }
+
+    /**
+     * Checks whether the binary tree is a full binary tree.
+     *
+     * @return true if the binary tree is a full binary tree, false otherwise
+     */
+    public boolean isFull() {
+        return isFull(root);
+    }
+
+    private boolean isFull(Node<T> node) {
+        if (node == null) {
+            return true;
+        }
+        if (node.getLeft() == null && node.getRight() == null) {
+            return true;
+        }
+        if (node.getLeft() != null && node.getRight() != null) {
+            return isFull(node.getLeft()) && isFull(node.getRight());
+        }
+        return false;
+    }
+
+    /**
+     * Returns the maximum height of the tree.
+     *
+     * @return the maximum height of the tree
+     */
+    public int getMaxHeight() {
+        return size() - 1;
+    }
+
+    /**
+     * Returns the minimum height of the tree.
+     *
+     * @return the minimum height of the tree
+     */
+    public int getMinHeight() {
+        return (int) Math.floor(Math.log(size() + 1) / Math.log(2));
+    }
+
+    /**
+     * Returns the minimum number of nodes in a binary tree of the same height as the tree.
+     *
+     * @return the minimum number of nodes in a binary tree of the same height as the tree
+     */
+    public int getMinNodes() {
+        return (int) Math.pow(2, getMinHeight()) - 1;
+    }
+
+    /**
+     * Returns the number of nodes in the complete binary tree rooted at the specified node.
+     *
+     * @param <TP> the type of the value stored in the node
+     * @param node the root of the tree
+     * @return the number of nodes in the tree
+     */
+    public <TP extends Comparable<T>> int countNodesCompleteBT(Node<T> node) {
+        if (node == null) {
+            return 0;
+        }
+        int leftHeight = getLeftHeight(node);
+        int rightHeight = getRightHeight(node);
+        if (leftHeight == rightHeight) {
+            // The tree is full and complete
+            return (1 << (leftHeight + 1)) - 1;
+        } else {
+            // The tree is not full and complete
+            int leftCount = countNodesCompleteBT(node.getLeft());
+            int rightCount = countNodesCompleteBT(node.getRight());
+            return 1 + leftCount + rightCount;
+        }
+    }
+
+    /**
+     * Returns the height of the left subtree of the given node.
+     *
+     * @param <TP> the type of the value stored in the node
+     * @param node the root of the subtree
+     * @return the height of the subtree
+     */
+    private <TP extends Comparable<T>> int getLeftHeight(Node<T> node) {
+        int height = 0;
+        while (node.getLeft() != null) {
+            height++;
+            node = node.getLeft();
+        }
+        return height;
+    }
+
+    /**
+     * Returns the height of the right subtree of the given node.
+     *
+     * @param <TP> the type of the value stored in the node
+     * @param node the root of the subtree
+     * @return the height of the subtree
+     */
+    private <TP extends Comparable<T>> int getRightHeight(Node<T> node) {
+        int height = 0;
+        while (node.getRight() != null) {
+            height++;
+            node = node.getRight();
+        }
+        return height;
+    }
+
+    /**
+     * Returns the number of leaves (i.e., nodes with no children) in the tree.
+     *
+     * @return the number of leaves in the tree
+     */
+    public int countLeaves() {
+        return countLeaves(root);
+    }
+
+    private int countLeaves(Node<T> node) {
+        if (node == null) {
+            return 0;
+        } else if (node.getLeft() == null && node.getRight() == null) {
+            return 1;
+        } else {
+            return countLeaves(node.getLeft()) + countLeaves(node.getRight());
+        }
+    }
+
+    /**
+     * Returns the number of non-leaf nodes (i.e., nodes with at least one child) in the tree.
+     *
+     * @return the number of non-leaf nodes in the tree
+     */
+    public int countNonLeaves() {
+        return countNonLeaves(root);
+    }
+
+    private int countNonLeaves(Node<T> node) {
+        if (node == null || (node.getLeft() == null && node.getRight() == null)) {
+            return 0;
+        } else {
+            return 1 + countNonLeaves(node.getLeft()) + countNonLeaves(node.getRight());
+        }
+    }
+
+    /**
+     * Checks if the tree is a binary search tree.
+     *
+     * @return true if the tree is a binary search tree, false otherwise
+     */
+    public boolean isBST() {
+        if (root == null) {
+            return true;
+        } else {
+            return isBST(root, null, null);
+        }
+        /*if (root.getValue() instanceof Integer) {
+            return isBST(root, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        } else if (root.getValue() instanceof Character) {
+            return isBST(root, 'a', 'z');
+        } else if (root.getValue() instanceof String) {
+            return isBST(root, "apple", "zebra");
+        } else if (root.getValue() instanceof Float) {
+            return isBST(root, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY);
+        } else {
+            throw new IllegalArgumentException("Unsupported data type");
+        }*/
+    }
+
+    /**
+     * Recursively checks if the subtree rooted at the specified node is a binary search tree.
+     *
+     * @param node the root of the subtree to check
+     * @param min  the minimum value that nodes in the subtree can have
+     * @param max  the maximum value that nodes in the subtree can have
+     * @return true if the subtree is a binary search tree, false otherwise
+     */
+    private boolean isBST(Node<T> node, T min, T max) {
+        if (node == null) {
+            return true;
+        }
+        if ((min != null && node.getValue().compareTo(min) <= 0) ||
+                (max != null && node.getValue().compareTo(max) >= 0)) {
+            return false;
+        }
+        return isBST(node.getLeft(), min, node.getValue()) && isBST(node.getRight(), node.getValue(), max);
+    }
+
+    /**
+     * Prints a graphical representation of the binary tree to standard output.
+     * The tree is printed in a top-down fashion, with each level of the tree
+     * indented by 4 spaces and nodes printed in the order right, root, left.
+     *
+     * @param root the root node of the tree to print
+     */
+    public void printTree(Node<T> root) {
+        // Clear the console before printing the tree
         try {
             new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-        int maxLevel = getMaxLevel(root);
+
+        // Get the maximum depth of the tree
+        int maxLevel = getDepth(root) + 1;
+
+        // Create a StringBuilder to store the string representation of the tree
         StringBuilder sb = new StringBuilder();
+
+        // Print the nodes of the tree in a vertical format
         printNodeInternal(Collections.singletonList(root), 1, maxLevel, sb);
+
+        // Print the StringBuilder to the console
         System.out.println(sb);
     }
 
-    private static void printNodeInternal(List<Node> nodes, int level, int maxLevel, StringBuilder sb) {
+    /**
+     * Helper method that prints the nodes of the binary tree to a StringBuilder
+     * in a vertical format.
+     *
+     * @param nodes    the list of nodes to print
+     * @param level    the current level of the tree
+     * @param maxLevel the maximum level of the tree
+     * @param sb       the StringBuilder used to store the string representation of the tree
+     */
+    private static <T extends Comparable<T>> void printNodeInternal(List<Node<T>> nodes, int level, int maxLevel, StringBuilder sb) {
+        // Stop printing if the list of nodes is empty or all elements are null
         if (nodes.isEmpty() || isAllElementsNull(nodes))
             return;
 
+        // Calculate the number of edge lines and spaces for this level of the tree
         int floor = maxLevel - level;
-        int endgeLines = (int) Math.pow(2, (Math.max(floor - 1, 0)));
+        int edgeLines = (int) Math.pow(2, (Math.max(floor - 1, 0)));
         int firstSpaces = (int) Math.pow(2, (floor)) - 1;
         int betweenSpaces = (int) Math.pow(2, (floor + 1)) - 1;
 
+        // Add the necessary first spaces to the StringBuilder
         appendWhitespaces(firstSpaces, sb);
 
-        List<Node> newNodes = new ArrayList<Node>();
-        for (Node node : nodes) {
+        // Create a new list to store the child nodes for the next level of the tree
+        List<Node<T>> newNodes = new ArrayList<Node<T>>();
+
+        // Iterate through the nodes in the current level
+        for (Node<T> node : nodes) {
             if (node != null) {
-                sb.append(node.value);
-                newNodes.add(node.left);
-                newNodes.add(node.right);
+                // Append the value of the node to the StringBuilder
+                sb.append(node.getValue());
+
+                // Add the child nodes of the current node to the new list
+                newNodes.add(node.getLeft());
+                newNodes.add(node.getRight());
             } else {
+                // If the current node is null, add two null nodes and a space to the new list and append a space to the StringBuilder
                 newNodes.add(null);
                 newNodes.add(null);
                 sb.append(" ");
             }
 
+            // Add the necessary between spaces to the StringBuilder
             appendWhitespaces(betweenSpaces, sb);
         }
+
+        // Append a newline character to the StringBuilder
         sb.append("\n");
 
-        for (int i = 1; i <= endgeLines; i++) {
+        // Iterate through the edge lines for this level of the tree
+        for (int i = 1; i <= edgeLines; i++) {
+            // Iterate through the nodes in the current level
             for (int j = 0; j < nodes.size(); j++) {
+                // Add the necessary spaces before the edge symbol
                 appendWhitespaces(firstSpaces - i, sb);
+
+                // Print the left edge symbol if there is a left child node, otherwise add a space
                 if (nodes.get(j) == null) {
-                    appendWhitespaces(endgeLines + endgeLines + i + 1, sb);
+                    appendWhitespaces(edgeLines + edgeLines + i + 1, sb);
                     continue;
                 }
-
-                if (nodes.get(j).left != null)
-                    if (nodes.get(j).left.value > 10)
-                        sb.append(" /");
-                    else
-                        sb.append("/");
+                if (nodes.get(j).getLeft() != null)
+                    sb.append("/");
                 else
                     appendWhitespaces(1, sb);
 
+                // Add the necessary spaces between the edge symbols
                 appendWhitespaces(i + i - 1, sb);
 
-                if (nodes.get(j).right != null)
-                    if (nodes.get(j).right.value > 10)
-                        sb.append("\\ ");
-                    else
-                        sb.append("\\");
-
+                // Print the right edge symbol if there is a right child node, otherwise add a space
+                if (nodes.get(j).getRight() != null)
+                    sb.append("\\");
                 else
                     appendWhitespaces(1, sb);
 
-                appendWhitespaces(endgeLines + endgeLines - i, sb);
+                // Add the necessary spaces after the edge symbol
+                appendWhitespaces(edgeLines + edgeLines - i, sb);
             }
 
+            // Append a newline character to the StringBuilder
             sb.append("\n");
         }
 
+        // Recursively print the child nodes for the next level of the tree
         printNodeInternal(newNodes, level + 1, maxLevel, sb);
     }
 
+    /**
+     * Appends the specified number of spaces to the StringBuilder.
+     *
+     * @param count the number ofspaces to append
+     * @param sb    the StringBuilder to append the spaces to
+     */
     private static void appendWhitespaces(int count, StringBuilder sb) {
-        for (int i = 0; i < count; i++)
+        for (int i = 0; i < count; i++) {
             sb.append(" ");
+        }
     }
 
-    private static boolean isAllElementsNull(List<Node> list) {
+    /**
+     * Checks if all the elements in the specified list are null.
+     *
+     * @param list the list to check
+     * @return true if all elements in the list are null, false otherwise
+     */
+    private static boolean isAllElementsNull(List<?> list) {
         for (Object object : list) {
-            if (object != null)
+            if (object != null) {
                 return false;
-        }
-
-        return true;
-    }
-
-    public void add(int value) {
-        if (root == null) {
-            root = new Node(value);
-            return;
-        }
-        Queue<Node> queue = new LinkedList<>();
-        queue.offer(root);
-        while (!queue.isEmpty()) {
-            Node current = queue.poll();
-            if (current.left == null) {
-                current.left = new Node(value);
-                return;
-            } else {
-                queue.offer(current.left);
             }
-            if (current.right == null) {
-                current.right = new Node(value);
-                return;
-            } else {
-                queue.offer(current.right);
-            }
-        }
-    }
-
-    private void preArrayRepresentation(Node node) {
-        if (node != null) {
-            PreTreeVector.add(node);
-            preArrayRepresentation(node.left);
-            preArrayRepresentation(node.right);
-        }
-    }
-
-    public Node search(Node node, int data) {
-        preArrayRepresentation(root);
-        int index = 0;
-        for (index = 0; index < PreTreeVector.size(); index++) {
-            if (PreTreeVector.get(index).value == data)
-                return PreTreeVector.get(index);
-        }
-        return null;
-    }
-
-    public Node min(Node node) {
-        PreTreeVector.clear();
-        preArrayRepresentation(node);
-        Node min = new Node(Integer.MAX_VALUE);
-        for (Node n : PreTreeVector) {
-            if (n.value < min.value)
-                min = n;
-        }
-        return min;
-    }
-
-    public Node max(Node node) {
-        PreTreeVector.clear();
-        preArrayRepresentation(node);
-        Node max = new Node(Integer.MIN_VALUE);
-        for (Node n : PreTreeVector) {
-            if (n.value > max.value)
-                max = n;
-        }
-        return max;
-    }
-
-    private int[] inOrderMatrix(Node node) {
-        List<Integer> inorderList = new ArrayList<>();
-        if (node != null) {
-            int[] left = inOrderMatrix(node.left);
-            for (int i = 0; i < left.length; i++) {
-                inorderList.add(left[i]);
-            }
-            inorderList.add(node.value);
-            int[] right = inOrderMatrix(node.right);
-            for (int i = 0; i < right.length; i++) {
-                inorderList.add(right[i]);
-            }
-        }
-        return inorderList.stream().mapToInt(Integer::intValue).toArray();
-    }
-
-    boolean isInorder() {
-        int[] arr = inOrderMatrix(root);
-        int n = arr.length;
-        // Complexity : O(n)
-        if (n == 0 || n == 1)
-            return true;
-        for (int i = 1; i < n; i++) {
-            if (arr[i - 1] > arr[i])
-                return false;
         }
         return true;
-    }
-
-    public void HandleInputChoices(BST Tree) {
-        Scanner in = new Scanner(System.in);
-        int element, choice;
-        boolean input = false;
-        while (!input) {
-            System.out.print("Enter : "
-                    + "\n 1- To Build A Balanced Tree By Entering Tree Levels Number"
-                    + "\n 2- To Build A Tree By Entering Input Matrix"
-                    + "\n 3- To Build A Tree By Entering In-Matrix & Pre-Matrix"
-                    + "\nCommand :");
-            choice = in.nextInt();
-            switch (choice) {
-                case 1: {
-                    System.out.print("Enter Tree Levels Number : ");
-                    int level;
-                    level = in.nextInt();
-                    Tree.buildBalanced(level);
-                    input = true;
-                    break;
-                }
-                case 2: {
-                    System.out.print("Enter Number Of Elements : ");
-                    int n = in.nextInt();
-                    System.out.print("Enter Elements : ");
-                    for (int i = 0; i < n; i++) {
-                        element = in.nextInt();
-                        Node node = new Node(element, null, null);
-                        Tree.insert(node);
-                    }
-                    input = true;
-                    break;
-                }
-                case 3: {
-                    System.out.print("Enter Number Of Elements : ");
-                    int n = in.nextInt();
-                    int[] In = new int[n];
-                    int[] Pre = new int[n];
-                    System.out.print("Enter In-Matrix Elements : ");
-                    for (int i = 0; i < n; i++) {
-                        In[i] = in.nextInt();
-                    }
-                    System.out.print("Enter Pre-Matrix Elements : ");
-                    for (int i = 0; i < n; i++) {
-                        Pre[i] = in.nextInt();
-                    }
-                    Tree.root = Tree.buildTreeInPre(In, Pre, 0, n - 1);
-                    input = true;
-                    break;
-                }
-                default: {
-                    break;
-                }
-            }
-        }
-        Tree.printTree(Tree.root);
-        input = false;
-        while (!input) {
-            System.out.print("Enter :"
-                    + "\n 1- To Get Min"
-                    + "\n 2- To Get Max"
-                    + "\n 3- To Add Element as Leaf"
-                    + "\n 4- To Add Element as Root"
-                    + "\n 5- To Delete Element"
-                    + "\n 6- To Check Element Existence"
-                    + "\n 7- To Count Element Existence"
-                    + "\n 8- To Search About Element"
-                    + "\n 9- To Get The Next Element"
-                    + "\n10- To Get The Previous Element"
-                    + "\n11- Preorder Printing"
-                    + "\n12- Inorder Printing"
-                    + "\n13- PostOrder Printing"
-                    + "\n14- Print All Orders "
-                    + "\n15- To Check If Its Inorder "
-                    + "\n16- To Check If Dead End Exist "
-                    + "\n17- To Get The Lowest Common Ancestor Between Two Elements "
-                    + "\n18- To Calculate Distance Between Two Elements "
-                    + "\n19- To Count The Number Of Leaves"
-                    + "\n20- To Count The Number Of Non-Leaves"
-                    + "\n21- To Check If The Tree Is Full"
-                    + "\n22- To Check If The Tree Is Complete"
-                    + "\n23- To Check If The Tree Is Strict"
-                    + "\n24- To Count Nodes In A Complete Tree"
-                    + "\n25- To Convert The BST To AVL"
-                    + "\n-1- To Back"
-                    + "\n 0- To Exit"
-                    + "\nCommand :");
-            choice = in.nextInt();
-            switch (choice) {
-                case 1: {
-                    Tree.printTree(Tree.root);
-                    System.out.println("Min = " + Tree.min(Tree.root).value);
-                    break;
-                }
-                case 2: {
-                    Tree.printTree(Tree.root);
-                    System.out.println("Max = " + Tree.max(Tree.root).value);
-                    break;
-                }
-                case 3: {
-                    System.out.print("Enter Element that You Want To Add : ");
-                    element = in.nextInt();
-                    Node node = new Node(element, null, null);
-                    Tree.insert(node);
-                    Tree.printTree(Tree.root);
-                    break;
-
-                }
-                case 4: {
-                    if (Tree.getClass() != AVL.class) {
-                        System.out.print("Enter Element that You Want To Add : ");
-                        element = in.nextInt();
-                        Tree.AddRoot(element);
-                        Tree.printTree(Tree.root);
-                    } else {
-                        Tree.printTree(Tree.root);
-                        System.out.println("Its Not Allowed To Add Root In AVL!");
-                    }
-                    break;
-                }
-                case 5: {
-                    System.out.print("Enter Element that You Want To Delete : ");
-                    element = in.nextInt();
-                    Node node = Tree.search(Tree.root, element);
-                    if (node == null) {
-                        Tree.printTree(Tree.root);
-                        System.out.println("Element Not Found!");
-                    } else {
-                        Tree.root = Tree.erase(Tree.root, element);
-                        Tree.printTree(Tree.root);
-                    }
-                    break;
-                }
-                case 6: {
-                    System.out.print("Enter Element that You Want To Check : ");
-                    element = in.nextInt();
-                    Tree.printTree(Tree.root);
-                    if (Tree.check(Tree.root, element))
-                        System.out.println("Element Does Exist!");
-                    else
-                        System.out.println("Element Does NOT Exist!");
-                    break;
-                }
-                case 7: {
-                    System.out.print("Enter Element that You Want To Count : ");
-                    element = in.nextInt();
-                    Tree.printTree(Tree.root);
-                    System.out.println("Element Does Exist " + Tree.count(Tree.root, element) + " Times!");
-                    break;
-                }
-                case 8: {
-                    System.out.print("Enter Element that You Want To Search About : ");
-                    element = in.nextInt();
-                    Node node = Tree.find(Tree.root, element);
-                    Tree.printTree(Tree.root);
-                    if (node == null) {
-                        System.out.println("Element Was NOT Found!");
-                    } else {
-                        System.out.println("Element Was Found!\nElement : " + node.value);
-                        if (node.left != null) {
-                            System.out.println("Left Child : " + node.left.value);
-                        } else {
-                            System.out.println("Left Child : NULL");
-                        }
-                        if (node.right != null) {
-                            System.out.println("Right Child : " + node.right.value);
-                        } else {
-                            System.out.println("Right Child : NULL");
-                        }
-                        if (node.parent != null) {
-                            System.out.println("Parent : " + node.parent.value);
-                        } else {
-                            System.out.println("Parent : NULL");
-                        }
-                        if (Tree.getClass() == AVL.class) {
-                            System.out.println("Height : " + node.height);
-                            System.out.println("Balance : " + node.balance);
-                        }
-                    }
-                    break;
-                }
-                case 9: {
-                    System.out.print("Enter Element that You Want To Get Its Next : ");
-                    element = in.nextInt();
-                    Tree.printTree(Tree.root);
-                    Node node = Tree.find(Tree.root, element);
-                    if (node == null) {
-                        System.out.println("The Element That You Have Entered Does Not Exist!");
-                    } else {
-                        Node next = Tree.successor(node);
-                        if (next == null) {
-                            System.out.println("Next Element Was Not Found!\nThe Element You Have Entered Is Max!");
-                        } else {
-                            System.out.println("Next Element : " + next.value);
-                        }
-                    }
-                    break;
-                }
-                case 10: {
-                    System.out.print("Enter Element that You Want To Get Its Previous : ");
-                    element = in.nextInt();
-                    Tree.printTree(Tree.root);
-                    Node node = Tree.find(Tree.root, element);
-                    if (node == null) {
-                        System.out.println("The Element That You Have Entered Does Not Exist!");
-                    } else {
-                        Node next = Tree.predecessor(node);
-                        if (next == null) {
-                            System.out.println("Next Element Was Not Found!\nThe Element You Have Entered Is Min!");
-                        } else {
-                            System.out.println("Next Element : " + next.value);
-                        }
-                    }
-                    break;
-                }
-                case 11: {
-                    Tree.printTree(Tree.root);
-                    System.out.print("Preorder : ");
-                    Tree.preOrder(Tree.root);
-                    System.out.println();
-                    break;
-                }
-                case 12: {
-                    Tree.printTree(Tree.root);
-                    System.out.print("Inorder : ");
-                    Tree.inOrder(Tree.root);
-                    System.out.println();
-                    break;
-                }
-                case 13: {
-                    Tree.printTree(Tree.root);
-                    System.out.print("Postorder : ");
-                    Tree.postOrder(Tree.root);
-                    System.out.println();
-                    break;
-                }
-                case 14: {
-                    Tree.printTree(Tree.root);
-                    System.out.print("Preorder : ");
-                    Tree.preOrder(Tree.root);
-                    System.out.println();
-                    System.out.print("Inorder : ");
-                    Tree.inOrder(Tree.root);
-                    System.out.println();
-                    System.out.print("Postorder : ");
-                    Tree.postOrder(Tree.root);
-                    System.out.println();
-                    break;
-                }
-                case 15: {
-                    Tree.printTree(Tree.root);
-                    if (Tree.isInorder())
-                        System.out.println("Its Inorder!");
-                    else
-                        System.out.println("Its Not Inorder!");
-                    break;
-                }
-                case 16: {
-                    Tree.printTree(Tree.root);
-                    if (Tree.deadEnd(Tree.root))
-                        System.out.println("Dead End Does Exist!");
-                    else
-                        System.out.println("Dead End Does Not Exist!");
-                    break;
-                }
-                case 17: {
-                    System.out.print("Enter the First Element : ");
-                    int one = in.nextInt();
-                    System.out.print("Enter the Second Element : ");
-                    int two = in.nextInt();
-                    Node n1 = Tree.search(Tree.root, one);
-                    Node n2 = Tree.search(Tree.root, two);
-                    if (n1 != null && n2 != null) {
-                        Node lca = Tree.LCA(Tree.root, one, two);
-                        Tree.printTree(Tree.root);
-                        if (lca != null)
-                            System.out.println("The Lowest Common Ancestor is : " + lca.value);
-                        else
-                            System.out.println("The Lowest Common Ancestor is : Null");
-                    } else {
-                        Tree.printTree(Tree.root);
-                        System.out.println("The Element That You Have Entered Does Not Exist in The Tree!");
-                    }
-                    break;
-                }
-                case 18: {
-                    System.out.print("Enter the First Element : ");
-                    int one = in.nextInt();
-                    System.out.print("Enter the Second Element : ");
-                    int two = in.nextInt();
-                    Node n1 = Tree.search(Tree.root, one);
-                    Node n2 = Tree.search(Tree.root, two);
-                    if (n1 != null && n2 != null) {
-                        int distance = Tree.calcDistanceBetween2(Tree.root, one, two);
-                        Tree.printTree(Tree.root);
-                        System.out.println("The Distance Between The Two Elements is : " + distance);
-                    } else {
-                        Tree.printTree(Tree.root);
-                        System.out.println("The Element That You Have Entered Does Not Exist in The Tree!");
-                    }
-                    break;
-                }
-                case 19: {
-                    Tree.printTree(Tree.root);
-                    System.out.println("The Number of Leaves : " + Tree.countLeaves(Tree.root));
-                    break;
-                }
-                case 20: {
-                    Tree.printTree(Tree.root);
-                    System.out.println("The Number of Non-Leaves : " + Tree.countNonLeaves(Tree.root));
-                    break;
-                }
-                case 21: {
-                    System.out.print("Enter The Element : ");
-                    element = in.nextInt();
-                    Node node = Tree.search(Tree.root, element);
-                    Tree.printTree(Tree.root);
-                    if (node != null) {
-                        if (Tree.isFull(node)) {
-                            System.out.println("The Tree is Full!");
-                        } else {
-                            System.out.println("The Tree Is Not Full!");
-                        }
-                    } else {
-                        System.out.println("The Element That You Have Entered Does Not Exist!");
-                    }
-                    break;
-                }
-                case 22: {
-                    System.out.print("Enter The Element : ");
-                    element = in.nextInt();
-                    Node node = Tree.search(Tree.root, element);
-                    Tree.printTree(Tree.root);
-                    if (node != null) {
-                        if (Tree.isComplete(node)) {
-                            System.out.println("The Tree is Complete!");
-                        } else {
-                            System.out.println("The Tree Is Not Complete!");
-                        }
-                    } else {
-                        System.out.println("The Element That You Have Entered Does Not Exist!");
-                    }
-                    break;
-                }
-                case 23: {
-                    System.out.print("Enter The Element : ");
-                    element = in.nextInt();
-                    Node node = Tree.search(Tree.root, element);
-                    Tree.printTree(Tree.root);
-                    if (node != null) {
-                        if (Tree.isStrict(node)) {
-                            System.out.println("The Tree is Strict!");
-                        } else {
-                            System.out.println("The Tree Is Not Strict!");
-                        }
-                    } else {
-                        System.out.println("The Element That You Have Entered Does Not Exist!");
-                    }
-                    break;
-                }
-                case 24: {
-                    Tree.printTree(Tree.root);
-                    if (Tree.isComplete(Tree.root)) {
-                        System.out.println("The Number Of Nodes is : " + Tree.countNodesCompleteBT(Tree.root));
-                    } else {
-                        System.out.println("The Tree Is Not Complete!");
-                    }
-                    break;
-                }
-                case 25: {
-                    Tree = Tree.ConvertToAVL(Tree);
-                    Tree.printTree(Tree.root);
-                    break;
-                }
-                case -1: {
-                    input = true;
-                    break;
-                }
-                case 0: {
-                    System.exit(0);
-                    break;
-                }
-                default: {
-                    break;
-                }
-            }
-        }
     }
 
 }

@@ -1,338 +1,283 @@
-import java.util.LinkedList;
-import java.util.Queue;
+/**
+ * Binary Search Tree implementation that inherits from BinaryTree class.
+ */
+public class BST<T extends Comparable<T>> extends BinaryTree<T> {
 
-public class BST extends BinaryTree {
-
-    public BST() {
-        root = null;
+    /**
+     * Inserts an element into the BST.
+     *
+     * @param value the value to insert into the BST
+     */
+    @Override
+    public boolean insert(T value) {
+        root = insert(root, value);
+        return true;
     }
 
-    public BST(Node root) {
-        this.root = root;
-    }
-
-    public boolean check(Node node, int data) {
-        if (node == null)
-            return false;
-        if (node.value == data)
-            return true;
-        else if (node.value > data)
-            return check(node.left, data);
-        else
-            return check(node.right, data);
-    }
-
-    public Node find(Node node, int data) {
-        if (node == null || node.value == data)
-            return node;
-        else if (node.value > data)
-            return find(node.left, data);
-        else
-            return find(node.right, data);
-    }
-
-    public int count(Node node, int data) {
-        if (node == null)
-            return 0;
-        if (node.value == data)
-            return this.count(node.right, data) + 1;
-        else if (node.value > data)
-            return this.count(node.left, data);
-        else
-            return this.count(node.right, data);
-    }
-
-    private Node[] Cut(Node node, int data) {
+    /**
+     * Helper method to recursively insert a value into the BST.
+     *
+     * @param node  the root of the subtree to insert the value into
+     * @param value the value to insert
+     * @return the root of the updated subtree
+     */
+    private Node<T> insert(Node<T> node, T value) {
         if (node == null) {
-            return new Node[]{null, null};
+            return new Node<>(value);
         }
-
-        if (node.value == data) {
-            Node less_sub = node.left;
-            Node more_sub = node.right;
-            node.left = null;
-            node.right = null;
-            return new Node[]{less_sub, more_sub};
+        if (value.compareTo(node.getValue()) < 0) {
+            Node<T> leftChild = insert(node.getLeft(), value);
+            node.setLeft(leftChild);
+        } else if (value.compareTo(node.getValue()) > 0) {
+            Node<T> rightChild = insert(node.getRight(), value);
+            node.setRight(rightChild);
         }
-
-        if (node.value > data) {
-            Node[] subNodes = Cut(node.left, data);
-            node.left = subNodes[1];
-            return new Node[]{subNodes[0], node};
-        } else {
-            Node[] subNodes = Cut(node.right, data);
-            node.right = subNodes[0];
-            return new Node[]{node, subNodes[1]};
-        }
-    }
-
-    public void AddRoot(int data) {
-        Node r = new Node(data, null, null);
-        Node[] subNodes = Cut(root, data);
-        r.left = subNodes[0];
-        r.right = subNodes[1];
-        if (r.right != null)
-            r.right.parent = r;
-        if (r.left != null)
-            r.left.parent = r;
-        root = r;
-    }
-
-    public void buildBalanced(int level) {
-        int p = 1 << level;
-        p /= 2;
-        Node node;
-        node = new Node(p);
-        insert(node);
-        int dif = p;
-        buildHelper(node, dif / 2);
-    }
-
-    private void buildHelper(Node node, int dif) {
-        if (node != null && dif != 0) {
-            insert(new Node(node.value - dif, null, null));
-            buildHelper(node.left, dif / 2);
-            insert(new Node(node.value + dif, null, null));
-            buildHelper(node.right, dif / 2);
-        }
-    }
-
-    public Node search(Node node, int data) {
-        while (node != null && node.value != data) {
-            if (node.value > data)
-                node = node.left;
-            else
-                node = node.right;
-        }
+        node.updateHeight();
         return node;
     }
 
-    public Node min(Node node) {
-        while (node.left != null) {
-            node = node.left;
-        }
-        return node;
+    /**
+     * Searches the tree for a node with the specified value and returns it.
+     *
+     * @param value the value to search for
+     * @return the node with the specified value, or null if it is not found
+     */
+    @Override
+    public Node<T> search(T value) {
+        return search(root, value);
     }
 
-    public Node max(Node node) {
-        while (node.right != null) {
-            node = node.right;
-        }
-        return node;
-    }
-
-    public Node successor(Node node) {
-        if (node.right != null)
-            return min(node.right);
-        Node parent = node.parent;
-        while (parent != null && node == parent.right) {
-            node = parent;
-            parent = parent.parent;
-        }
-        return parent;
-    }
-
-    public Node predecessor(Node node) {
-        if (node.left != null)
-            return max(node.left);
-        Node parent = node.parent;
-        while (parent != null && node == parent.left) {
-            node = parent;
-            parent = parent.parent;
-        }
-        return parent;
-    }
-
-    public void insert(Node node) {
-        Node p = null;
-        Node current = root;
-        while (current != null) {
-            p = current;
-            if (node.value < current.value)
-                current = current.left;
-            else
-                current = current.right;
-        }
-        node.parent = p;
-        if (p == null)
-            root = node;  //Tree was Empty
-        else if (node.value < p.value)
-            p.left = node;
-        else
-            p.right = node;
-    }
-
-    protected void Transplant(Node deleted, Node replacement) {//#Replaces one subtree as a child of its parent with another subtree
-        if (deleted.parent == null) {
-            root = replacement;
-        } else if (deleted == deleted.parent.left)
-            deleted.parent.left = replacement;
-        else
-            deleted.parent.right = replacement;
-        if (replacement != null && replacement != deleted.left) {
-            replacement.parent = deleted.parent;
-            replacement.left = deleted.left;
-            if (replacement.left != null)
-                replacement.left.parent = replacement;
-        } else if (replacement != null) {
-            replacement.parent = deleted.parent;
-            replacement.right = deleted.right;
-            if (replacement.right != null)
-                replacement.right.parent = replacement;
-        }
-    }
-
-    public void delete(Node node) {
-        if (node.left == null)
-            Transplant(node, node.right);
-        else if (node.right == null) {
-            Transplant(node, node.left);
-        } else {
-            Node next;
-            next = min(node.right);
-            if (next.parent != node) {
-                Transplant(next, next.right);
-                next.right = node.right;
-                if (next.right != null)
-                    next.right.parent = next;
-            }
-            Transplant(node, next);
-        }
-    }
-
-    public Node addLeaf(Node node, int data) {
+    /**
+     * Helper method to recursively search for a value in the BST.
+     *
+     * @param node  the root of the subtree to search in
+     * @param value the value to search for
+     * @return the node with the specified value, or null if it is not found
+     */
+    private Node<T> search(Node<T> node, T value) {
         if (node == null) {
-            node = new Node(data);
+            return null;
+        }
+        if (value.compareTo(node.getValue()) < 0) {
+            return search(node.getLeft(), value);
+        } else if (value.compareTo(node.getValue()) > 0) {
+            return search(node.getRight(), value);
+        } else {
             return node;
         }
-        if (node.value > data) {
-            Node left = addLeaf(node.left, data);
-            node.left = left;
-            left.parent = node;
-        } else if (node.value < data) {
-            Node right = addLeaf(node.right, data);
-            node.right = right;
-            right.parent = node;
-        }
-        return node;
     }
 
-    public Node erase(Node node, int data) {
-        if (node == null)
-            return null;
-        if (node.value > data) {
-            Node left = erase(node.left, data);
-            node.left = left;
-            if (left != null)
-                left.parent = node;
-        } else if (node.value < data) {
-            Node right = erase(node.right, data);
-            node.right = right;
-            if (right != null)
-                right.parent = node;
-        } else {
-            if (node.left == null)
-                return node.right;
-            else if (node.right == null)
-                return node.left;
-            int Successor = min(node.right).value;
-            node.value = Successor;
-            Node right = erase(node.right, Successor);
-            node.right = right;
-            if (right != null)
-                right.parent = node;
-        }
-        return node;
-    }
-
-    public Node buildTreeFromPre(int[] pre) {
-        return buildTreeFromPreHelper(pre, 0, pre[0], Integer.MIN_VALUE, Integer.MAX_VALUE);
-    }
-
-    private Node buildTreeFromPreHelper(int[] pre, int preIndex, int data, int min, int max) {
-        // Complexity : O(n)
-        if (preIndex >= pre.length)
-            return null;
-        Node node = null;
-        if (data > min && data < max) {
-            node = new Node(data);
-            preIndex++;
-            if (preIndex < pre.length) {
-                Node left = buildTreeFromPreHelper(pre, preIndex, pre[preIndex], min, data);
-                node.left = left;
-                if (left != null)
-                    left.parent = node;
-            }
-            if (preIndex < pre.length) {
-                Node right = buildTreeFromPreHelper(pre, preIndex, pre[preIndex], data, max);
-                node.right = right;
-                if (right != null)
-                    right.parent = node;
-            }
-        }
-        return node;
-    }
-
-    public boolean deadEnd(Node node) {
-        // All Values Should Be Integers and Distinct and Positive
-        return deadEndChecker(node, min(node).value, max(node).value);
-    }
-
-    private boolean deadEndChecker(Node node, int min, int max) {
-        // Complexity : O(n)
-        if (node == null)
+    /**
+     * Deletes an element from the BST.
+     *
+     * @param value the value to delete
+     */
+    @Override
+    public boolean delete(T value) {
+        if (value.compareTo(root.getValue()) == 0 || search(value) == null)
             return false;
-        if (min == max)
-            return true;
-        return deadEndChecker(node.left, min, node.value - 1) || deadEndChecker(node.right, node.value + 1, max);
+        root = delete(root, value);
+        return true;
     }
 
-    public Node LCA(Node node, int one, int two) {
-        // LCA : Lowest Common Ancestor
-        // Complexity : O(h)
-        if (node == null)
+    /**
+     * Helper method to recursively delete a value from the BST.
+     *
+     * @param node  the root of the subtree to delete the value from
+     * @param value the value to delete
+     * @return the root of the updated subtree
+     */
+    private Node<T> delete(Node<T> node, T value) {
+        if (node == null) {
             return null;
-        if (node.value > one && node.value > two)
-            return LCA(node.left, one, two);
-        if (node.value < one && node.value < two)
-            return LCA(node.right, one, two);
+        }
+        if (value.compareTo(node.getValue()) < 0) {
+            Node<T> leftChild = delete(node.getLeft(), value);
+            node.setLeft(leftChild);
+        } else if (value.compareTo(node.getValue()) > 0) {
+            Node<T> rightChild = delete(node.getRight(), value);
+            node.setRight(rightChild);
+        } else {
+            if (node.getLeft() == null && node.getRight() == null) {
+                return null;
+            } else if (node.getLeft() == null) {
+                return node.getRight();
+            } else if (node.getRight() == null) {
+                return node.getLeft();
+            } else {
+                Node<T> temp = findMin(node.getRight());
+                node.setValue(temp.getValue());
+                Node<T> rightChild = delete(node.getRight(), temp.getValue());
+                node.setRight(rightChild);
+            }
+        }
+        node.updateHeight();
         return node;
     }
 
-    public int calcDistanceBetween2(Node node, int one, int two) {
-        // Complexity : O(h)
-        if (node == null)
-            return 0;
-        if (node.value > one && node.value > two)
-            return calcDistanceBetween2(node.left, one, two);
-        if (node.value < one && node.value < two)
-            return calcDistanceBetween2(node.right, one, two);
-        return calcDistance(node, one) + calcDistance(node, two);
-    }
-
-    private int calcDistance(Node node, int data) {
-        if (node.value == data)
-            return 0;
-        else if (node.value > data)
-            return 1 + calcDistance(node.left, data);
-        return 1 + calcDistance(node.right, data);
-    }
-
-    public AVL ConvertToAVL(BST Tree) {
-        Node node = Tree.root;
-        AVL AVLTree = new AVL(null);
-        Queue<Node> q = new LinkedList<>();
-        q.add(node);
-        while (!q.isEmpty()) {
-            Node curr = q.peek();
-            if (curr.left != null)
-                q.add(curr.left);
-            if (curr.right != null)
-                q.add(curr.right);
-            node = new Node(curr.value);
-            AVLTree.insert(node);
-            q.poll();
+    /**
+     * Finds the minimum value in a subtree.
+     *
+     * @param node the root of the subtree to find the minimum value in
+     * @return the minimum value in the subtree
+     */
+    protected Node<T> findMin(Node<T> node) {
+        while (node.getLeft() != null) {
+            node = node.getLeft();
         }
-        return AVLTree;
+        return node;
     }
+
+    /**
+     * Finds the maximum value in a subtree.
+     *
+     * @param node the root of the subtree to find the maximum value in
+     * @return the maximum value in the subtree
+     */
+    private Node<T> findMax(Node<T> node) {
+        while (node.getRight() != null) {
+            node = node.getRight();
+        }
+        return node;
+    }
+
+    /**
+     * Returns the node with the minimum value in the tree.
+     *
+     * @return the node with the minimum value in the tree, or null if the tree is empty
+     */
+    @Override
+    public Node<T> getMin() {
+        Node<T> current = root;
+        while (current != null && current.getLeft() != null) {
+            current = current.getLeft();
+        }
+        return current;
+    }
+
+    /**
+     * Returns the node with the maximum value in the tree.
+     *
+     * @return the node with the maximum value in the tree, or null if the tree is empty
+     */
+    @Override
+    public Node<T> getMax() {
+        Node<T> current = root;
+        while (current != null && current.getRight() != null) {
+            current = current.getRight();
+        }
+        return current;
+    }
+
+    /**
+     * Checks if a dead end exists in the BST.
+     *
+     * @return true if a dead end exists, false otherwise
+     */
+    public boolean deadEnd() {
+        return deadEnd(root, null, null);
+        /*if (root.getValue() instanceof Integer) {
+            return deadEnd(root, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        } else if (root.getValue() instanceof Character) {
+            return deadEnd(root, 'a', 'z');
+        } else if (root.getValue() instanceof String) {
+            return deadEnd(root, "apple", "zebra");
+        } else if (root.getValue() instanceof Float) {
+            return deadEnd(root, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY);
+        } else {
+            throw new IllegalArgumentException("Unsupported data type");
+        }*/
+    }
+
+    /**
+     * Helper method to recursively check for a dead end in the BST.
+     *
+     * @param node the root of the subtree to check
+     * @param min  the minimum value allowed in the subtree (exclusive)
+     * @param max  the maximum value allowed in the subtree (exclusive)
+     * @return true if a dead end exists in the subtree, false otherwise
+     */
+    private boolean deadEnd(Node<T> node, T min, T max) {
+        if (node == null) {
+            return false;
+        }
+        T value = node.getValue();
+        if ((min != null && value.compareTo(min) <= 0) && (max != null && value.compareTo(max) >= 0)) {
+            return true;
+        }
+        return deadEnd(node.getLeft(), min, value) || deadEnd(node.getRight(), value, max);
+    }
+
+    /**
+     * Finds the lowest common ancestor of two nodes with the specified values in the BST.
+     *
+     * @param value1 the value of the first node
+     * @param value2 the value of the second node
+     * @return the lowest common ancestor of the two nodes, or null if one or both values are not in the BST
+     */
+    public Node<T> LCA(T value1, T value2) {
+        return LCA(root, value1, value2);
+    }
+
+    /**
+     * Helper method to recursively find the lowest common ancestor of two nodes with the specified values in the BST.
+     *
+     * @param node   the root of the subtree to search in
+     * @param value1 the value of the first node
+     * @param value2 the value of the second node
+     * @return the lowest common ancestor of the two nodes, or null if one or both values are not in the BST
+     */
+    private Node<T> LCA(Node<T> node, T value1, T value2) {
+        if (node == null) {
+            return null;
+        }
+        if (node.getValue().compareTo(value1) > 0 && node.getValue().compareTo(value2) > 0) {
+            return LCA(node.getLeft(), value1, value2);
+        }
+        if (node.getValue().compareTo(value1) < 0 && node.getValue().compareTo(value2) < 0) {
+            return LCA(node.getRight(), value1, value2);
+        }
+        return node;
+    }
+
+    /**
+     * Calculates the distance between two nodes with the specified values in the BST.
+     *
+     * @param value1 the value of the first node
+     * @param value2 the value of the second node
+     * @return the distance between the two nodes, or -1 if one or both values are not in the BST
+     */
+    public int calcDistance(T value1, T value2) {
+        Node<T> lcaNode = LCA(value1, value2);
+        if (lcaNode == null) {
+            return -1;
+        }
+        int distance1 = calcDistanceBetween(lcaNode, value1);
+        int distance2 = calcDistanceBetween(lcaNode, value2);
+        return distance1 + distance2;
+    }
+
+    /**
+     * Calculates the distance between a node with the specified value and a given node in the BST.
+     *
+     * @param node  the node to start the distance calculation from
+     * @param value the value of the node to calculate the distance to
+     * @return the distance between the two nodes
+     */
+    private int calcDistanceBetween(Node<T> node, T value) {
+        if (node == null) {
+            return -1;
+        }
+        int distance = -1;
+        if (node.getValue().equals(value)) {
+            distance = 0;
+        } else if (node.getValue().compareTo(value) > 0) {
+            distance = 1 + calcDistanceBetween(node.getLeft(), value);
+        } else {
+            distance = 1 + calcDistanceBetween(node.getRight(), value);
+        }
+        return distance;
+    }
+
+
 }

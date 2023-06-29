@@ -1,67 +1,128 @@
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class MaxHeap extends Heap {
-    protected void maxHeapifyTopDown(ArrayList<Integer> array, int elementsNumber, int index) {
-        // because The Tree Is Complete :
+/**
+ * This class represents a max binary heap data structure that extends the abstract Heap class.
+ * The MaxHeap class provides implementations of the abstract insert and remove methods, which define the specific behavior of the binary heap.
+ */
+public class MaxHeap<T extends Comparable<T>> extends Heap<T> {
+
+    /**
+     * This method restores the max-heap property from the given index to the root of the heap,
+     * assuming that the left and right children of the given index are already max-heaps.
+     *
+     * @param index the index to start heapifying from
+     */
+    protected void heapifyUp(int index) {
         // Time Complexity : O(log(n))
+        int parentIndex = getParentIndex(index);
+        if (parentIndex >= 0 && heapArray.get(index).compareTo(heapArray.get(parentIndex)) > 0) {
+            swap(index, parentIndex);
+            heapifyUp(parentIndex);
+        }
+    }
+
+    /**
+     * This method restores the max-heap property from the given index to the leaves of the heap,
+     * assuming that the left and right children of the given index are already max-heaps.
+     *
+     * @param index the index to start heapifying from
+     */
+    protected void heapifyDown(int index) {
+        // Time Complexity : O(log(n))
+        int leftChildIndex = getLeftChildIndex(index);
+        int rightChildIndex = getRightChildIndex(index);
         int largest = index;
-        int right = rightSonIndex(index);
-        int left = leftSonIndex(index);
-        if (left <= elementsNumber && array.get(left) > array.get(largest))
-            largest = left;
-        if (right <= elementsNumber && array.get(right) > array.get(largest))
-            largest = right;
+        if (heapArray.get(largest) != null && leftChildIndex < heapSize && heapArray.get(leftChildIndex).compareTo(heapArray.get(largest)) > 0) {
+            largest = leftChildIndex;
+        }
+
+        if (heapArray.get(largest) != null && rightChildIndex < heapSize && heapArray.get(rightChildIndex).compareTo(heapArray.get(largest)) > 0) {
+            largest = rightChildIndex;
+        }
+
         if (largest != index) {
-            swap(array, index, largest);
-            maxHeapifyTopDown(array, elementsNumber, largest);
+            swap(index, largest);
+            heapifyDown(largest);
         }
     }
 
-    public void insert(int element) {
-        if (heapArray.size() > (heapSize + 1))
-            heapArray.set(heapSize + 1, element);
-        else
-            heapArray.add(element);
+    /**
+     * This method inserts an element into the heap and restores the max-heap property if necessary.
+     *
+     * @param element the element to be inserted
+     */
+    @Override
+    public void insert(T element) {
+        heapArray.add(element);
         heapSize++;
-        maxHeapifyBottomUp(heapSize);
+        heapifyUp(heapSize - 1);
     }
 
-    private void maxHeapifyBottomUp(int index) {
-        if (index != 1 && heapArray.get(index) > heapArray.get(parentIndex(index))) {
-            swap(heapArray, index, parentIndex(index));
-            maxHeapifyBottomUp(parentIndex(index));
+    /**
+     * This method removes the element with the maximum value from the heap and restores the max-heap property if necessary.
+     *
+     * @return the element with the maximum value
+     */
+    @Override
+    public T remove() {
+        if (heapSize == 0) {
+            return null;
         }
+        T max = heapArray.get(0);
+        heapArray.set(0, heapArray.get(heapSize - 1));
+        heapSize--;
+        heapifyDown(0);
+        return max;
     }
 
-    public int search(int element) {
-        for (int i = 1; i <= heapSize; i++) {
-            if (element == heapArray.get(i))
+    /**
+     * This method searches for an element in the heap and returns its index if found, or -1 otherwise.
+     *
+     * @param element the element to search for
+     * @return the index of the element if found, or -1 otherwise
+     */
+    public int search(T element) {
+        for (int i = 0; i < heapSize; i++) {
+            if (heapArray.get(i).equals(element)) {
                 return i;
+            }
         }
         return -1;
     }
 
+    /**
+     * This method deletes an element from the heap at the given index, if it exists.
+     * It then restores the max-heap property if necessary.
+     *
+     * @param index the index of the element to be deleted
+     */
     public void delete(int index) {
-        if (index <= 0 || index > heapSize)
+        if (index < 0 || index >= heapSize) {
             return;
-        heapArray.set(index, heapArray.get(heapSize));
+        }
+        heapArray.set(index, heapArray.get(heapSize - 1));
         heapSize--;
-        if (index != 1 && heapArray.get(index) > heapArray.get(parentIndex(index)))
-            maxHeapifyBottomUp(index);
-        else
-            maxHeapifyTopDown(heapArray, heapSize, index);
+        if (index != 0 && heapArray.get(index).compareTo(heapArray.get(getParentIndex(index))) > 0) {
+            heapifyUp(index);
+        } else {
+            heapifyDown(index);
+        }
     }
 
+    /**
+     * This method builds a max heap from an ArrayList of elements.
+     * It prompts the user to enter the number of elements and the elements themselves.
+     */
     public void buildMaxHeap() {
         Scanner in = new Scanner(System.in);
         System.out.print("Enter Number Of Elements : ");
-        int n = in.nextInt(), element;
-        ArrayList<Integer> array = new ArrayList<>(n + 1);
+        int n = in.nextInt();
+        ArrayList<T> array = new ArrayList<>(n + 1);
         System.out.print("Enter Elements : ");
-        array.add(0);
+        array.add(null);
         for (int i = 1; i <= n; i++) {
-            element = in.nextInt();
+            T element = (T) in.next();
             array.add(element);
         }
         heapSize = array.size() - 1;
@@ -70,26 +131,58 @@ public class MaxHeap extends Heap {
         printHeapArray();
     }
 
-    private void buildMaxHeapArray(ArrayList<Integer> array) {
-        // Time Complexity : O(nlog(n))
-        for (int i = array.size() / 2; i >= 1; i--) {
-            maxHeapifyTopDown(heapArray, heapSize, i);
+    /**
+     * This method builds a max heap from an ArrayList of elements.
+     * It assumes that the ArrayList is a complete binary tree, and starts heapifying from the last non-leaf node to the root.
+     *
+     * @param array the ArrayList of elements to be transformed into a max heap
+     */
+    private void buildMaxHeapArray(ArrayList<T> array) {
+        // Time Complexity : O(n)
+        for (int i = heapSize / 2; i >= 0; i--) {
+            heapifyDown(i);
         }
     }
 
-    public ArrayList<Integer> HeapSort(ArrayList<Integer> array) {
+    /**
+     * This method sorts an ArrayList of elements using the heap sort algorithm.
+     *
+     * @param array the ArrayList of elements to be sorted
+     * @return the sorted ArrayList of elements
+     */
+    public ArrayList<T> heapSort(ArrayList<T> array) {
         // Time Complexity : O(nlog(n))
         buildMaxHeapArray(array);
-        int elementsNumber = array.size() - 1;
-        for (int i = array.size() - 1; i >= 2; i--) {
-            swap(array, 1, i);
+        int elementsNumber = heapSize;
+        for (int i = array.size() - 1; i >= 1; i--) {
+            swap(array, 0, i);
             elementsNumber--;
-            maxHeapifyTopDown(array, elementsNumber, 1);
+            heapifyDown(0);
         }
         return array;
     }
 
-    public void HandleInputChoices(MaxHeap heap) {
+    /**
+     * This method swaps two elements in an ArrayList.
+     *
+     * @param array the ArrayList containing the elements to be swapped
+     * @param i     the index of the first element
+     * @param j     the index of the second element
+     */
+    private void swap(ArrayList<T> array, int i, int j) {
+        T temp = array.get(i);
+        array.set(i, array.get(j));
+        array.set(j, temp);
+    }
+
+    /**
+     * This method handles user input choices for a MaxHeap object.
+     * It prompts the user to enter a command to print the heap array, print the heap tree, sort the heap array,
+     * insert an element, delete an element, go back to the previous menu, or exit the program.
+     *
+     * @param heap the MaxHeap object to handle input choices for
+     */
+    public void handleInputChoices(MaxHeap heap) {
         Scanner in = new Scanner(System.in);
         buildMaxHeap();
         int choice;
@@ -115,26 +208,23 @@ public class MaxHeap extends Heap {
                     break;
                 }
                 case 3: {
-                    ArrayList<Integer> sorted = new ArrayList<>();
-                    for (int i = 0; i <= heapSize; i++) {
-                        sorted.add(heapArray.get(i));
-                    }
-                    System.out.println("Heap Sort Array : " + HeapSort(sorted));
+                    ArrayList<T> sorted = new ArrayList<>(heap.heapArray.subList(1, heap.heapSize + 1));
+                    System.out.println("Heap Sort Array : " + heapSort(sorted));
                     break;
                 }
                 case 4: {
                     System.out.print("Enter Element You Want To Add : ");
-                    int element = in.nextInt();
-                    insert(element);
+                    T element = (T) in.next();
+                    heap.insert(element);
                     printHeapArray();
                     break;
                 }
                 case 5: {
                     System.out.print("Enter Element You Want To Delete : ");
-                    int element = in.nextInt();
-                    int index = search(element);
+                    T element = (T) in.next();
+                    int index = heap.search(element);
                     if (index != -1) {
-                        delete(index);
+                        heap.delete(index);
                         printHeapArray();
                     } else {
                         printHeapArray();

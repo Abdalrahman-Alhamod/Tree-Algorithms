@@ -1,50 +1,60 @@
 import java.util.Scanner;
 
-public class PriorityQueue extends MaxHeap {
-    public int top() {
-        return heapArray.get(1);
+/**
+ * This class represents a priority queue data structure that extends the MaxHeap class.
+ * The PriorityQueue class provides implementations of the enqueue and dequeue methods, which define the specific behavior of the priority queue.
+ */
+public class PriorityQueue<T extends Comparable<T>> extends MaxHeap<T> {
+
+    /**
+     * Inserts an element into the priority queue in its appropriate position based on its priority.
+     *
+     * @param element the element to be inserted
+     */
+    public void enqueue(T element) {
+        insert(element);
     }
 
-    public void enqueue(int element) {
-        // Time Complexity : O(log(n))
-        heapSize++;
-        heapArray.add(heapSize, element);
-        int index = heapSize;
-        while (index != 1 && heapArray.get(index) > heapArray.get(parentIndex(index))) {
-            swap(heapArray, index, parentIndex(index));
-            index = parentIndex(index);
+    /**
+     * Removes and returns the element with the highest priority from the priority queue.
+     *
+     * @return the element with the highest priority
+     */
+    public T dequeue() {
+        return remove();
+    }
+
+    /**
+     * Returns the element with the highest priority without removing it from the priority queue.
+     *
+     * @return the element with the highest priority
+     */
+    public T peek() {
+        if (heapSize == 0) {
+            return null;
         }
+        return heapArray.get(0);
     }
 
-    public void dequeue() {
-        // Time Complexity : O(log(n))
-        if (heapSize != 0) {
-            swap(heapArray, 1, heapSize);
-            heapSize--;
-            maxHeapifyTopDown(heapArray, heapSize, 1);
-        } else {
-            System.out.println("The Queue Is Empty!");
-        }
-    }
 
-    public void printHeapArray() {
-        System.out.print("Priority Queue : ");
-        for (int i = 1; i <= heapSize; i++) {
-            System.out.print(heapArray.get(i) + " ");
-        }
-        System.out.println();
-    }
-
-    public void HandleInputChoices(MaxHeap heap) {
+    /**
+     * This method handles user input choices for a PriorityQueue object.
+     * It prompts the user to enter a command to print the priority queue, print the element with the highest priority,
+     * add an element to the priority queue, remove an element from the priority queue, go back to the previous menu, or exit the program.
+     *
+     * @param queue the PriorityQueue object to handle input choices for
+     */
+    public void handleInputChoices(PriorityQueue<T> queue) {
         Scanner in = new Scanner(System.in);
         buildMaxHeap();
         int choice;
         boolean input = false;
         while (!input) {
             System.out.print("Enter : "
-                    + "\n 1- Top"
-                    + "\n 2- Enqueue"
-                    + "\n 3- Dequeue"
+                    + "\n 1- Print Priority Queue"
+                    + "\n 2- Print Element With Highest Priority"
+                    + "\n 3- Add An Element To The Priority Queue"
+                    + "\n 4- Remove An Element From The Priority Queue"
                     + "\n-1- Back"
                     + "\n 0- Exit"
                     + "\nCommand :");
@@ -52,20 +62,23 @@ public class PriorityQueue extends MaxHeap {
             switch (choice) {
                 case 1: {
                     printHeapArray();
-                    if (heapSize >= 1)
-                        System.out.println("Top : " + top());
-                    else
-                        System.out.println("The Queue Is Empty!");
                     break;
                 }
                 case 2: {
-                    System.out.print("Enter Element : ");
-                    int element = in.nextInt();
+                    if (heapSize >= 1)
+                        System.out.println("Element With Highest Priority : " + peek());
+                    else
+                        System.out.println("The Priority Queue Is Empty!");
+                    break;
+                }
+                case 3: {
+                    System.out.print("Enter Element You Want To Add : ");
+                    T element = (T) in.next();
                     enqueue(element);
                     printHeapArray();
                     break;
                 }
-                case 3: {
+                case 4: {
                     dequeue();
                     printHeapArray();
                     break;
