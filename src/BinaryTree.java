@@ -733,13 +733,13 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
      *
      * @param root the root node of the tree to print
      */
-    public void printTree(Node<T> root) {
+    public String printTree(Node<T> root) {
         // Clear the console before printing the tree
-        try {
-            new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+//        try {
+//            new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+//        } catch (Exception e) {
+//            System.out.println(e.getMessage());
+//        }
 
         // Get the maximum depth of the tree
         int maxLevel = getDepth(root) + 1;
@@ -750,8 +750,8 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
         // Print the nodes of the tree in a vertical format
         printNodeInternal(Collections.singletonList(root), 1, maxLevel, sb);
 
-        // Print the StringBuilder to the console
-        System.out.println(sb);
+        // Returning  the StringBuilder to the toString function
+        return sb.toString();
     }
 
     /**
@@ -866,6 +866,11 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
             }
         }
         return true;
+    }
+
+    @Override
+    public String toString(){
+        return printTree(root);
     }
 
 }
