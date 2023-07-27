@@ -1,66 +1,18 @@
 import java.util.ArrayList;
 
+import static java.util.Collections.reverse;
+
 public class Main {
     public static void main(String[] args) {
-//        BST<Integer> tree = new BST<>();
-//        tree.insert(8);
-//        tree.insert(2);
-//        tree.insert(52);
-//        tree.insert(4);
-//        tree.insert(43);
-//        tree.insert(6);
-//        tree.insert(45);
-//        tree.insert(8);
-//        tree.insert(3);
-//        tree.insert(10);
-//        System.out.println(tree);
-//        tree.delete(4);
-//        System.out.println(tree);
-//        tree.delete(3);
-//        System.out.println(tree);
-//        tree.delete(10);
-//        System.out.println(tree);
-//        tree.delete(8);
-//        System.out.println(tree);
-//        tree.delete(45);
-//        System.out.println(tree);
         MinHeap<Integer> heap = new MinHeap<>();
-        heap.insert(1);
-        heap.insert(12);
-        heap.insert(3);
-        heap.insert(43);
-        heap.insert(5);
-        heap.insert(13);
-        heap.insert(7);
-        heap.insert(83);
-        heap.insert(9);
-        heap.insert(10);
-        heap.printHeapTree();
-        heap.printHeapArray();
-        System.out.println(heap);
-        heap.remove();
-        heap.printHeapArray();
-        System.out.println(heap.remove());
-        heap.printHeapArray();
-        heap.delete(9);
-        heap.printHeapArray();
-        heap.delete(4);
-        heap.printHeapArray();
         ArrayList<Integer> array = new ArrayList<>();
-        array.add(11);
-        array.add(52);
-        array.add(13);
-        array.add(65);
-        array.add(15);
-        array.add(85);
-        array.add(9);
-        array.add(6);
-        array.add(59);
-        array.add(10);
-        System.out.println(array);
-        heap.printHeapArray();
-        System.out.println(heap.heapSort(array));
-        heap.printHeapArray();
-        System.out.println(heap);
+        heap.setUseRecursiveApproach(false);
+        for (int i = 1; i <= 1E7; i++) {
+            array.add(i);
+        }
+        reverse(array);
+        heap.heapSort(array);
+
+        System.out.println(ExecutionTimeCalculator.getFormattedExecutionTime());
     }
 }
