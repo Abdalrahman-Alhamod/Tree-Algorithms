@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Scanner;
 
 /**
  * A class representing a minimum heap data structure.
@@ -21,16 +20,31 @@ public class MinHeap<T extends Comparable<T>> extends Heap<T> {
      * @param heapArray the array of elements to initialize the heap with
      */
     public MinHeap(ArrayList<T> heapArray) {
-        super(heapArray);
+        useRecursiveApproach = true;
         buildMinHeapArray(heapArray);
     }
 
     /**
-     * Heapify an element at the given index in the heap in a top-down manner.
+     * Heapify an element at the given index in the heap in a top-down manner
      *
      * @param index the index of the element to heapify
+     * @implNote This method has a time complexity of O(log(n))
      */
     protected void heapifyTopDown(int index) {
+        if (useRecursiveApproach)
+            heapifyTopDownRecursive(index);
+        else
+            heapifyTopDownIterative(index);
+    }
+
+    /**
+     * Heapify an element at the given index in the heap in a top-down manner
+     * using a recursive approach.
+     *
+     * @param index the index of the element to heapify
+     * @implNote This method has a time complexity of O(log(n))
+     */
+    protected void heapifyTopDownRecursive(int index) {
         int smallest = index;
         int right = getRightChildIndex(index);
         int left = getLeftChildIndex(index);
@@ -40,7 +54,41 @@ public class MinHeap<T extends Comparable<T>> extends Heap<T> {
             smallest = right;
         if (smallest != index) {
             swap(index, smallest);
-            heapifyTopDown(smallest);
+            heapifyTopDownRecursive(smallest);
+        }
+    }
+
+    /**
+     * Heapify an element at the given index in the heap in a top-down manner
+     * using an iterative approach.
+     *
+     * @param index the index of the element to heapify
+     * @implNote This method has a time complexity of O(log(n))
+     */
+    protected void heapifyTopDownIterative(int index) {
+        int current = index;
+
+        while (true) {
+            int smallest = current;
+            int rightChildIndex = getRightChildIndex(current);
+            int leftChildIndex = getLeftChildIndex(current);
+
+            if (leftChildIndex <= heapSize &&
+                    heapArray.get(leftChildIndex).compareTo(heapArray.get(smallest)) < 0) {
+                smallest = leftChildIndex;
+            }
+
+            if (rightChildIndex <= heapSize &&
+                    heapArray.get(rightChildIndex).compareTo(heapArray.get(smallest)) < 0) {
+                smallest = rightChildIndex;
+            }
+
+            if (smallest != current) {
+                swap(current, smallest);
+                current = smallest;
+            } else {
+                break; // The heap property is satisfied, no need to continue.
+            }
         }
     }
 
@@ -48,6 +96,7 @@ public class MinHeap<T extends Comparable<T>> extends Heap<T> {
      * Insert an element into the heap.
      *
      * @param element the element to be inserted
+     * @implNote This method has a time complexity of O(log(n))
      */
     public void insert(T element) {
         heapArray.add(element);
@@ -56,14 +105,51 @@ public class MinHeap<T extends Comparable<T>> extends Heap<T> {
     }
 
     /**
-     * Heapify an element at the given index in the heap in a bottom-up manner.
+     * Heapify an element at the given index in the heap in a bottom-up manner
      *
      * @param index the index of the element to heapify
+     * @implNote This method has a time complexity of O(log(n))
      */
     protected void heapifyBottomUp(int index) {
+        if (useRecursiveApproach)
+            heapifyBottomUpRecursive(index);
+        else
+            heapifyBottomUpIterative(index);
+    }
+
+    /**
+     * Heapify an element at the given index in the heap in a bottom-up manner
+     * using a recursive approach.
+     *
+     * @param index the index of the element to heapify
+     * @implNote This method has a time complexity of O(log(n))
+     */
+    protected void heapifyBottomUpRecursive(int index) {
         if (index != 1 && heapArray.get(index).compareTo(heapArray.get(getParentIndex(index))) < 0) {
             swap(index, getParentIndex(index));
-            heapifyBottomUp(getParentIndex(index));
+            heapifyBottomUpRecursive(getParentIndex(index));
+        }
+    }
+
+    /**
+     * Heapify an element at the given index in the heap in a bottom-up manner
+     * using an iterative approach.
+     *
+     * @param index the index of the element to heapify
+     * @implNote This method has a time complexity of O(log(n))
+     */
+    protected void heapifyBottomUpIterative(int index) throws IndexOutOfBoundsException {
+        int current = index;
+
+        while (current > 1) {
+            int parentIndex = getParentIndex(current);
+
+            if (heapArray.get(current).compareTo(heapArray.get(parentIndex)) < 0) {
+                swap(current, parentIndex);
+                current = parentIndex;
+            } else {
+                break; // The heap property is satisfied, no need to continue.
+            }
         }
     }
 
@@ -72,6 +158,7 @@ public class MinHeap<T extends Comparable<T>> extends Heap<T> {
      *
      * @param element the element to search for
      * @return the index of the element, or -1 if it is not found
+     * @implNote This method has a time complexity of O(n)
      */
     public int search(T element) {
         for (int i = 1; i <= heapSize; i++) {
@@ -85,6 +172,7 @@ public class MinHeap<T extends Comparable<T>> extends Heap<T> {
      * Removes the minimum element from the heap and returns it.
      *
      * @return the minimum element in the heap, or null if the heap is empty
+     * @implNote This method has a time complexity of O(log(n))
      */
     @Override
     public T remove() {
@@ -106,47 +194,66 @@ public class MinHeap<T extends Comparable<T>> extends Heap<T> {
     }
 
     /**
-     * Delete an element from the heap.
+     * This method deletes a given element from the heap if it exists.
+     * It then restores the min-heap property if necessary.
      *
-     * @param index the index of the element to be deleted
+     * @param element the element to be deleted
+     * @return true if deleting done successfully, false otherwise
+     * @implNote This method has a time complexity of O(log(n))
      */
-    public void delete(int index) {
-        if (index <= 0 || index > heapSize)
-            return;
+    public boolean delete(T element) {
+        if (element == null) {
+            throw new IllegalArgumentException("Value cannot be null.");
+        }
+        int index = search(element);
+        if (index == -1)
+            return false;
         heapArray.set(index, heapArray.get(heapSize));
         heapSize--;
-        if (index != 1 && heapArray.get(index).compareTo(heapArray.get(getParentIndex(index))) < 0)
-            heapifyBottomUp(index);
-        else
+        if (index != 1 && heapArray.get(index).compareTo(heapArray.get(getParentIndex(index))) > 0) {
             heapifyTopDown(index);
+        } else {
+            heapifyBottomUp(index);
+        }
+        return true;
     }
 
     /**
      * Build a minimum heap from the given array of elements.
      *
      * @param array the array of elements to build the heap from
+     * @implNote This method has a time complexity of O(n)
      */
     public void buildMinHeapArray(ArrayList<T> array) {
-        heapSize = array.size() - 1;
+        heapSize = array.size();
+        array.add(0, null);
+        heapArray = array;
         for (int i = heapSize / 2; i >= 1; i--) {
             heapifyTopDown(i);
         }
     }
 
     /**
-     * Sort the elements of the heap in descending order using heap sort.
+     * This method sorts an ArrayList of elements using the heap sort algorithm.
      *
-     * @return the sorted array of elements
+     * @param array the ArrayList of elements to be sorted
+     * @return the sorted ArrayList of elements
+     * @implNote This method has a time complexity of O(n log(n))
      */
     public ArrayList<T> heapSort(ArrayList<T> array) {
         // Time Complexity : O(nlog(n))
+        ArrayList<T> beforeSortingArray = heapArray;
+        int beforeSortingSize = heapSize;
         buildMinHeapArray(array);
-        int elementsNumber = heapSize;
-        for (int i = array.size() - 1; i >= 1; i--) {
-            swap(array, 0, i);
-            elementsNumber--;
-            heapifyTopDown(0);
+        for (int i = heapSize; i >= 1; i--) {
+            swap(heapArray, 1, i);
+            heapSize--;
+            heapifyTopDown(1);
         }
+        array = heapArray;
+        array.remove(0);
+        heapSize = beforeSortingSize;
+        heapArray = beforeSortingArray;
         return array;
     }
 
@@ -156,6 +263,7 @@ public class MinHeap<T extends Comparable<T>> extends Heap<T> {
      * @param array the ArrayList containing the elements to be swapped
      * @param i     the index of the first element
      * @param j     the index of the second element
+     * @implNote This method has a time complexity of O(1)
      */
     private void swap(ArrayList<T> array, int i, int j) {
         T temp = array.get(i);
@@ -163,64 +271,4 @@ public class MinHeap<T extends Comparable<T>> extends Heap<T> {
         array.set(j, temp);
     }
 
-    /**
-     * Handle the user's choice of operation on the heap.
-     */
-    public void handleChoices(MinHeap heap) {
-        Scanner in = new Scanner(System.in);
-        int choice;
-        boolean input = false;
-        while (!input) {
-            System.out.print("Enter : "
-                    + "\n 1- Print Min Heap Array"
-                    + "\n 2- Print Min Heap Tree"
-                    + "\n 3- Print Heap Sort Descending Array"
-                    + "\n 4- Insert An Element"
-                    + "\n 5- Delete An Element"
-                    + "\n6- Search for an Element"
-                    + "\n 7- Exit"
-                    + "\nChoice: ");
-            choice = in.nextInt();
-            switch (choice) {
-                case 1:
-                    heap.printHeapArray();
-                    break;
-                case 2:
-                    heap.printHeapTree();
-                    break;
-                case 3:
-                    ArrayList<T> sorted = new ArrayList<>(heap.heapArray.subList(1, heap.heapSize + 1));
-                    System.out.println("Heap Sort Array : " + heapSort(sorted));
-                    break;
-                case 4:
-                    System.out.print("Enter element to insert: ");
-                    int element = in.nextInt();
-                    heap.insert(element);
-                    System.out.println("Element " + element + " inserted into the heap.");
-                    break;
-                case 5:
-                    System.out.print("Enter index of element to delete: ");
-                    int index = in.nextInt();
-                    heap.delete(index);
-                    System.out.println("Element at index " + index + " deleted from the heap.");
-                    break;
-                case 6:
-                    System.out.print("Enter element to search for: ");
-                    int elementToSearch = in.nextInt();
-                    int indexFound = heap.search(elementToSearch);
-                    if (indexFound != -1) {
-                        System.out.println("Element " + elementToSearch + " found at index " + indexFound + ".");
-                    } else {
-                        System.out.println("Element " + elementToSearch + " not found in the heap.");
-                    }
-                    break;
-                case 7:
-                    input = true;
-                    System.out.println("Exiting program.");
-                    break;
-                default:
-                    System.out.println("Invalid input. Please try again.");
-            }
-        }
-    }
 }

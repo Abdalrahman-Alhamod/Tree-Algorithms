@@ -12,7 +12,7 @@ public class AVL<T extends Comparable<T>> extends BST<T> {
      *
      * @param value the value to insert into the AVL tree
      * @return true if the value was successfully inserted, false otherwise
-     * @implNote This method has a time complexity of O(log(n)), where h is the height of the tree.
+     * @implNote This method has a time complexity of O(log(n))
      */
     @Override
     public boolean insert(T value) {
@@ -34,7 +34,7 @@ public class AVL<T extends Comparable<T>> extends BST<T> {
      * @param node  the root of the subtree to insert the value into
      * @param value the value to insert
      * @return the root of the updated subtree
-     * @implNote This method has a time complexity of O(log(n)), where h is the height of the tree.
+     * @implNote This method has a time complexity of O(log(n))
      */
     private Node<T> insertRecursive(Node<T> node, T value) {
         if (node == null) {
@@ -84,7 +84,7 @@ public class AVL<T extends Comparable<T>> extends BST<T> {
      * @param node  the root of the subtree to insert the value into
      * @param value the value to insert
      * @return the root of the updated subtree
-     * @implNote This method has a time complexity of O(log(n)), where h is the height of the tree.
+     * @implNote This method has a time complexity of O(log(n))
      */
     public boolean insertIterative(Node<T> node, T value) {
         Node<T> newNode = new Node<>(value);
@@ -163,11 +163,14 @@ public class AVL<T extends Comparable<T>> extends BST<T> {
      *
      * @param value the value to delete
      * @return true if the value was successfully deleted, false otherwise
-     * @implNote This method has a time complexity of O(log(n)), where h is the height of the tree.
+     * @implNote This method has a time complexity of O(log(n))
      */
     @Override
     public boolean delete(T value) {
-        if (value.compareTo(root.getValue()) == 0 || find(value) == null)
+        if (value == null) {
+            throw new IllegalArgumentException("Value cannot be null.");
+        }
+        if (find(value) == null)
             return false;
         root = delete(root, value);
         return true;
@@ -179,7 +182,7 @@ public class AVL<T extends Comparable<T>> extends BST<T> {
      * @param node  the root of the subtree to delete the value from
      * @param value the value to delete
      * @return the root of the updated subtree
-     * @implNote This method has a time complexity of O(log(n)), where h is the height of the tree.
+     * @implNote This method has a time complexity of O(log(n))
      */
     private Node<T> delete(Node<T> node, T value) {
         if (node == null) {

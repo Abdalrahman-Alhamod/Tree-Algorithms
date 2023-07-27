@@ -1,6 +1,4 @@
 import java.util.ArrayList;
-import java.util.Objects;
-import java.util.Scanner;
 
 /**
  * An abstract class representing a heap data structure.
@@ -20,24 +18,31 @@ public abstract class Heap<T extends Comparable<T>> {
     protected int heapSize;
 
     /**
+     * A boolean flag indicating whether to use the recursive approach or not.
+     * <p>
+     * When this flag is set to {@code true}, certain methods in the tree class, like insert, delete, and find,
+     * will use a recursive implementation. Conversely, when it is set to {@code false}, the iterative approach will be used.
+     * The choice of using a recursive or iterative approach may affect the performance and memory usage of the tree operations.
+     * </p>
+     * <p>
+     * By default, the value of this flag is set to {@code true}, meaning the recursive approach is used.
+     * Users of the tree class can modify this flag to change the behavior of tree operations accordingly.
+     * </p>
+     */
+    protected boolean useRecursiveApproach;
+
+    /**
      * Constructs a new heap with an empty array.
      */
     public Heap() {
         heapArray = new ArrayList<>();
+        heapArray.add(null);
+        heapSize = 0;
+        useRecursiveApproach=true;
     }
 
     /**
-     * Constructs a new heap with the given array of elements.
-     *
-     * @param heapArray the array of elements to initialize the heap with
-     */
-    public Heap(ArrayList<T> heapArray) {
-        Objects.requireNonNull(heapArray, "Heap array cannot be null");
-        this.heapArray = heapArray;
-    }
-
-    /**
-     * Returns the index of the right child of the given index.
+     * Returns the index of the right child for the given index.
      *
      * @param index the index of the parent node
      * @return the index of the right child node
@@ -47,7 +52,7 @@ public abstract class Heap<T extends Comparable<T>> {
     }
 
     /**
-     * Returns the index of the left child of the given index.
+     * Returns the index of the left child for the given index.
      *
      * @param index the index of the parent node
      * @return the index of the left child node
@@ -57,7 +62,7 @@ public abstract class Heap<T extends Comparable<T>> {
     }
 
     /**
-     * Returns the index of the parent of the given index.
+     * Returns the index of the parent for the given index.
      *
      * @param index the index of the child node
      * @return the index of the parent node
@@ -90,61 +95,6 @@ public abstract class Heap<T extends Comparable<T>> {
     }
 
     /**
-     * Handles the user's choice of operation on the heap.
-     */
-    public static void handleChoices() {
-        Scanner in = new Scanner(System.in);
-        int choice;
-        boolean input = false;
-        while (!input) {
-            System.out.print("Enter : "
-                    + "\n 1- Max Heap"
-                    + "\n 2- Min Heap"
-                    + "\n 3- Heap Sort"
-                    + "\n 4- Priority Queue"
-                    + "\n-1- Back"
-                    + "\n 0- Exit"
-                    + "\nCommand :");
-            choice = in.nextInt();
-            switch (choice) {
-                case 1: {
-                    MaxHeap<Integer> heap = new MaxHeap<>();
-                    heap.handleInputChoices(heap);
-                    break;
-                }
-                case 2: {
-                    MinHeap<Integer> heap = new MinHeap<>();
-                    heap.handleChoices(heap);
-                    break;
-                }
-                case 3: {
-                    MaxHeap<Integer> heap = new MaxHeap<>();
-                    heap.buildMaxHeap();
-                    ArrayList<Integer> sorted = heap.heapSort(heap.heapArray);
-                    sorted.remove(0);
-                    System.out.println("Heap Sort Array : " + sorted);
-                    break;
-                }
-                case 4: {
-                    PriorityQueue<Integer> queue = new PriorityQueue<>();
-                    queue.handleInputChoices(queue);
-                    break;
-                }
-                case -1: {
-                    input = true;
-                    break;
-                }
-                case 0: {
-                    System.exit(0);
-                    break;
-                }
-                default: {
-                }
-            }
-        }
-    }
-
-    /**
      * Prints the elements of the heap as a tree.
      */
     public void printHeapTree() {
@@ -152,7 +102,7 @@ public abstract class Heap<T extends Comparable<T>> {
         for (int i = 1; i <= heapSize; i++) {
             tree.insert(heapArray.get(i));
         }
-        tree.printTree(tree.root);
+        System.out.println(tree);
     }
 
     /**
@@ -168,4 +118,15 @@ public abstract class Heap<T extends Comparable<T>> {
      * @return the root element of the heap
      */
     public abstract T remove();
+
+    /**
+     * Sets the approach to use for certain operations in the binary tree.
+     *
+     * @param useRecursiveApproach true to use the recursive approach, false to use the iterative approach
+     * @implNote By default, the binary tree uses the recursive approach for operations. Setting this flag to false
+     * will switch to the iterative approach, which may affect the performance and memory usage of the tree operations.
+     */
+    public void setUseRecursiveApproach(boolean useRecursiveApproach) {
+        this.useRecursiveApproach = useRecursiveApproach;
+    }
 }

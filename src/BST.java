@@ -226,7 +226,7 @@ public class BST<T extends Comparable<T>> extends BinaryTree<T> {
         if (value == null) {
             throw new IllegalArgumentException("Value cannot be null.");
         }
-        if (value.compareTo(root.getValue()) == 0 || find(value) == null) return false;
+        if (find(value) == null) return false;
         if (useRecursiveApproach) {
             root = deleteRecursive(root, value);
             return true;
@@ -248,7 +248,6 @@ public class BST<T extends Comparable<T>> extends BinaryTree<T> {
         if (node == null) {
             return null;
         }
-
         // If the value to be deleted is less than the current node's value,
         // recursively delete the value from the left subtree.
         if (value.compareTo(node.getValue()) < 0) {
@@ -337,8 +336,8 @@ public class BST<T extends Comparable<T>> extends BinaryTree<T> {
                 } else {
                     // Case 3: node has two children
                     Node<T> successor = getSuccessor(current);
-                    current.setValue(successor.getValue());
                     delete(successor.getValue());
+                    current.setValue(successor.getValue());
                 }
 
                 // Case 1, 2, or 3: node has been removed, update height of nodes along the path
