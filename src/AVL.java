@@ -10,6 +10,7 @@ public class AVL<T extends Comparable<T>> extends BST<T> {
      *
      * @param value the value to insert into the AVL tree
      * @return true if the value was successfully inserted, false otherwise
+     * @implNote This method has a time complexity of O(log(n)), where h is the height of the tree.
      */
     @Override
     public boolean insert(T value) {
@@ -24,6 +25,7 @@ public class AVL<T extends Comparable<T>> extends BST<T> {
      * @param node  the root of the subtree to insert the value into
      * @param value the value to insert
      * @return the root of the updated subtree
+     * @implNote This method has a time complexity of O(log(n)), where h is the height of the tree.
      */
     private Node<T> insert(Node<T> node, T value) {
         if (node == null) {
@@ -71,6 +73,7 @@ public class AVL<T extends Comparable<T>> extends BST<T> {
      *
      * @param value the value to delete
      * @return true if the value was successfully deleted, false otherwise
+     * @implNote This method has a time complexity of O(log(n)), where h is the height of the tree.
      */
     @Override
     public boolean delete(T value) {
@@ -86,6 +89,7 @@ public class AVL<T extends Comparable<T>> extends BST<T> {
      * @param node  the root of the subtree to delete the value from
      * @param value the value to delete
      * @return the root of the updated subtree
+     * @implNote This method has a time complexity of O(log(n)), where h is the height of the tree.
      */
     private Node<T> delete(Node<T> node, T value) {
         if (node == null) {
@@ -144,6 +148,7 @@ public class AVL<T extends Comparable<T>> extends BST<T> {
      *
      * @param node the node to rotate left
      * @return the new root of the subtree
+     * @implNote This method has a time complexity of O(1)
      */
     private Node<T> leftRotate(Node<T> node) {
         Node<T> newRoot = node.getRight();
@@ -159,6 +164,7 @@ public class AVL<T extends Comparable<T>> extends BST<T> {
      *
      * @param node the node to rotate right
      * @return the new root of the subtree
+     * @implNote This method has a time complexity of O(1)
      */
     private Node<T> rightRotate(Node<T> node) {
         Node<T> newRoot = node.getLeft();

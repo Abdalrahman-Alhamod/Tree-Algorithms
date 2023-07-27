@@ -633,7 +633,7 @@ public class BST<T extends Comparable<T>> extends BinaryTree<T> {
         if (node == null) {
             return -1;
         }
-        int distance = -1;
+        int distance;
         if (node.getValue().equals(value)) {
             distance = 0;
         } else if (node.getValue().compareTo(value) > 0) {
