@@ -1,3 +1,5 @@
+import java.util.Stack;
+
 /**
  * AVL Tree implementation that inherits from BST class.
  *
@@ -14,10 +16,17 @@ public class AVL<T extends Comparable<T>> extends BST<T> {
      */
     @Override
     public boolean insert(T value) {
-        root = insert(root, value);
-        return true;
+        if (value == null) {
+            throw new IllegalArgumentException("Value cannot be null.");
+        }
+        if (useRecursiveApproach) {
+            int beforeInsertSize = size;
+            root = insertRecursive(root, value);
+            return size != beforeInsertSize;
+        } else {
+            return insertIterative(root, value);
+        }
     }
-
 
     /**
      * Helper method to recursively insert a value into the AVL tree.
@@ -27,15 +36,16 @@ public class AVL<T extends Comparable<T>> extends BST<T> {
      * @return the root of the updated subtree
      * @implNote This method has a time complexity of O(log(n)), where h is the height of the tree.
      */
-    private Node<T> insert(Node<T> node, T value) {
+    private Node<T> insertRecursive(Node<T> node, T value) {
         if (node == null) {
+            size++;
             return new Node<>(value);
         }
         if (value.compareTo(node.getValue()) < 0) {
-            Node<T> leftChild = insert(node.getLeft(), value);
+            Node<T> leftChild = insertRecursive(node.getLeft(), value);
             node.setLeft(leftChild);
         } else if (value.compareTo(node.getValue()) > 0) {
-            Node<T> rightChild = insert(node.getRight(), value);
+            Node<T> rightChild = insertRecursive(node.getRight(), value);
             node.setRight(rightChild);
         } else {
             return node;
@@ -66,6 +76,86 @@ public class AVL<T extends Comparable<T>> extends BST<T> {
             node = leftRotate(node);
         }
         return node;
+    }
+
+    /**
+     * Helper method to iteratively insert a value into the AVL tree.
+     *
+     * @param node  the root of the subtree to insert the value into
+     * @param value the value to insert
+     * @return the root of the updated subtree
+     * @implNote This method has a time complexity of O(log(n)), where h is the height of the tree.
+     */
+    public boolean insertIterative(Node<T> node, T value) {
+        Node<T> newNode = new Node<>(value);
+        if (node == null) {
+            root = newNode;
+            size++;
+            return true;
+        }
+
+        Stack<Node<T>> stack = new Stack<>();
+        Node<T> current = node;
+
+        while (true) {
+            stack.push(current);
+            int cmp = value.compareTo(current.getValue());
+
+            if (cmp == 0) {
+                // The value already exists in the tree, so return current
+                return false;
+            } else if (cmp < 0) {
+                if (current.getLeft() == null) {
+                    current.setLeft(newNode);
+                    break;
+                } else {
+                    current = current.getLeft();
+                }
+            } else {
+                if (current.getRight() == null) {
+                    current.setRight(newNode);
+                    break;
+                } else {
+                    current = current.getRight();
+                }
+            }
+        }
+        size++;
+        // Update heights and perform rotations
+        while (!stack.isEmpty()) {
+            current = stack.pop();
+            current.updateHeight();
+            int balanceFactor = current.getBalanceFactor();
+
+            if (balanceFactor > 1) {
+                if (value.compareTo(current.getLeft().getValue()) < 0) {
+                    current = rightRotate(current);
+                } else {
+                    current.setLeft(leftRotate(current.getLeft()));
+                    current = rightRotate(current);
+                }
+            } else if (balanceFactor < -1) {
+                if (value.compareTo(current.getRight().getValue()) > 0) {
+                    current = leftRotate(current);
+                } else {
+                    current.setRight(rightRotate(current.getRight()));
+                    current = leftRotate(current);
+                }
+            }
+
+            if (!stack.isEmpty()) {
+                Node<T> parent = stack.peek();
+                if (parent.getLeft() == current) {
+                    parent.setLeft(current);
+                } else {
+                    parent.setRight(current);
+                }
+            } else {
+                root = current;
+            }
+        }
+
+        return true;
     }
 
     /**
