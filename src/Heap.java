@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * An abstract class representing a heap data structure.
@@ -38,7 +40,7 @@ public abstract class Heap<T extends Comparable<T>> {
         heapArray = new ArrayList<>();
         heapArray.add(null);
         heapSize = 0;
-        useRecursiveApproach=true;
+        useRecursiveApproach = true;
     }
 
     /**
@@ -98,11 +100,51 @@ public abstract class Heap<T extends Comparable<T>> {
      * Prints the elements of the heap as a tree.
      */
     public void printHeapTree() {
-        BinaryTree<T> tree = new BST<>();
-        for (int i = 1; i <= heapSize; i++) {
-            tree.insert(heapArray.get(i));
-        }
+        BinaryTree<T> tree = buildHeapTree();
         System.out.println(tree);
+    }
+
+    /**
+     * Builds a max-heap tree from the elements in the heapArray.
+     *
+     * @return the max-heap tree (BinaryTree)
+     */
+    private BinaryTree<T> buildHeapTree() {
+        // Create an empty binary tree
+        BinaryTree<T> tree = new BST<>();
+
+        // Use a queue for level-order insertion of elements
+        Queue<Node<T>> queue = new LinkedList<>();
+
+        // Insert the root (first element of the heapArray) into the tree
+        if (heapSize >= 1) {
+            Node<T> root = new Node<>(heapArray.get(1));
+            tree.root = root;
+            queue.add(root);
+        }
+
+        // Start level-order insertion of other elements
+        int currentIndex = 2; // Start with the second element in heapArray
+        while (!queue.isEmpty() && currentIndex <= heapSize) {
+            // Get the current parent node from the queue
+            Node<T> parent = queue.poll();
+
+            // Insert the left child
+            Node<T> leftChild = new Node<>(heapArray.get(currentIndex));
+            parent.setLeft(leftChild);
+            queue.add(leftChild);
+            currentIndex++;
+
+            // Insert the right child
+            if (currentIndex <= heapSize) {
+                Node<T> rightChild = new Node<>(heapArray.get(currentIndex));
+                parent.setRight(rightChild);
+                queue.add(rightChild);
+                currentIndex++;
+            }
+        }
+
+        return tree;
     }
 
     /**
@@ -128,5 +170,14 @@ public abstract class Heap<T extends Comparable<T>> {
      */
     public void setUseRecursiveApproach(boolean useRecursiveApproach) {
         this.useRecursiveApproach = useRecursiveApproach;
+    }
+
+    public String toString() {
+        ArrayList<T> array = new ArrayList<>(heapArray);
+        array.remove(0);
+        while (array.size() != heapSize) {
+            array.remove(heapSize);
+        }
+        return array.toString();
     }
 }

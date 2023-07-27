@@ -24,7 +24,7 @@ public class Main {
 //        System.out.println(tree);
 //        tree.delete(45);
 //        System.out.println(tree);
-        MaxHeap<Integer> heap = new MaxHeap<>();
+        MinHeap<Integer> heap = new MinHeap<>();
         heap.insert(1);
         heap.insert(12);
         heap.insert(3);
@@ -35,7 +35,9 @@ public class Main {
         heap.insert(83);
         heap.insert(9);
         heap.insert(10);
+        heap.printHeapTree();
         heap.printHeapArray();
+        System.out.println(heap);
         heap.remove();
         heap.printHeapArray();
         System.out.println(heap.remove());
@@ -56,6 +58,9 @@ public class Main {
         array.add(59);
         array.add(10);
         System.out.println(array);
+        heap.printHeapArray();
         System.out.println(heap.heapSort(array));
+        heap.printHeapArray();
+        System.out.println(heap);
     }
 }
