@@ -6,8 +6,8 @@ public class Node<T extends Comparable<T>> {
     private Node<T> left; // Pointer to the left child node
     private Node<T> right; // Pointer to the right child node
     private int height; // The height of the node in the tree
-    private Page leftPage; // The left page of the node
-    private Page rightPage; // The right page of the node
+    private Page leftPage; // The left page of the node (for B-Tree)
+    private Page rightPage; // The right page of the node (for B-Tree)
 
     /**
      * Constructs a new node with the given value.
@@ -21,6 +21,8 @@ public class Node<T extends Comparable<T>> {
         left = null;
         right = null;
         height = 0;
+        leftPage = null;
+        rightPage = null;
     }
 
     /**
