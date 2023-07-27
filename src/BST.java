@@ -108,7 +108,12 @@ public class BST<T extends Comparable<T>> extends BinaryTree<T> {
         // Increment the size of the tree and return true
         size++;
         // Update the height of the current node after inserting the value into the subtree
-        node.updateHeight();
+        Node<T> parent = node.getParent();
+        Node<T> nodeToUpdateHeight = (parent == null) ? root : parent;
+        while (nodeToUpdateHeight != null) {
+            nodeToUpdateHeight.updateHeight();
+            nodeToUpdateHeight = nodeToUpdateHeight.getParent();
+        }
 
         return true;
     }
@@ -229,7 +234,7 @@ public class BST<T extends Comparable<T>> extends BinaryTree<T> {
             return deleteIterative(value);
         }
     }
-    
+
     /**
      * Recursive helper method for deleting a value from the Binary Search Tree (BST).
      *

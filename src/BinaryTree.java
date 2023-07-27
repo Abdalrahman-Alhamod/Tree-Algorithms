@@ -512,12 +512,12 @@ public abstract class BinaryTree<T extends Comparable<T>> implements Tree<T> {
      */
     private int getDepthIterative(Node<T> node) {
         if (node == null) {
-            return 0;
+            return -1;
         }
 
         Queue<Node<T>> queue = new LinkedList<>();
         queue.add(node);
-        int depth = 0;
+        int depth = -1;
 
         while (!queue.isEmpty()) {
             int levelSize = queue.size();

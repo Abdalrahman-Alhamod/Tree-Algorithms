@@ -17,6 +17,7 @@ public class AVL<T extends Comparable<T>> extends BST<T> {
         return true;
     }
 
+
     /**
      * Helper method to recursively insert a value into the AVL tree.
      *
@@ -41,10 +42,10 @@ public class AVL<T extends Comparable<T>> extends BST<T> {
         // update height of the current node
         node.updateHeight();
 
-        // calculate balance factor of the current node
+        // calculate the balance factor of the current node
         int balanceFactor = node.getBalanceFactor();
 
-        // if balance factor is greater than 1, then the tree is left-heavy
+        // if the balance factor is greater than 1, then the tree is left-heavy
         if (balanceFactor > 1) {
             // if the left subtree is right-heavy, double rotation is required
             if (node.getLeft().getBalanceFactor() < 0) {
@@ -53,7 +54,7 @@ public class AVL<T extends Comparable<T>> extends BST<T> {
             // perform right rotation
             node = rightRotate(node);
         }
-        // if balance factor is less than -1, then the tree is right-heavy
+        // if the balance factor is less than -1, then the tree is right-heavy
         else if (balanceFactor < -1) {
             // if the right subtree is left-heavy, double rotation is required
             if (node.getRight().getBalanceFactor() > 0) {
@@ -73,7 +74,7 @@ public class AVL<T extends Comparable<T>> extends BST<T> {
      */
     @Override
     public boolean delete(T value) {
-        if (value.compareTo(root.getValue()) == 0 || search(value) == null)
+        if (value.compareTo(root.getValue()) == 0 || find(value) == null)
             return false;
         root = delete(root, value);
         return true;
@@ -104,7 +105,7 @@ public class AVL<T extends Comparable<T>> extends BST<T> {
             } else if (node.getRight() == null) {
                 return node.getLeft();
             } else {
-                Node<T> temp = findMin(node.getRight());
+                Node<T> temp = getMin(node.getRight());
                 node.setValue(temp.getValue());
                 Node<T> rightChild = delete(node.getRight(), temp.getValue());
                 node.setRight(rightChild);
@@ -114,10 +115,10 @@ public class AVL<T extends Comparable<T>> extends BST<T> {
         // update height of the current node
         node.updateHeight();
 
-        // calculate balance factor of the current node
+        // calculate the balance factor of the current node
         int balanceFactor = node.getBalanceFactor();
 
-        // if balance factor is greater than 1, then the tree is left-heavy
+        // if the balance factor is greater than 1, then the tree is left-heavy
         if (balanceFactor > 1) {
             // if the left subtree is right-heavy, double rotation is required
             if (node.getLeft().getBalanceFactor() < 0) {
@@ -126,7 +127,7 @@ public class AVL<T extends Comparable<T>> extends BST<T> {
             // perform right rotation
             node = rightRotate(node);
         }
-        // if balance factor is less than -1, then the tree is right-heavy
+        // if the balance factor is less than -1, then the tree is right-heavy
         else if (balanceFactor < -1) {
             // if the right subtree is left-heavy, double rotation is required
             if (node.getRight().getBalanceFactor() > 0) {
