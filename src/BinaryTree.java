@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -9,10 +6,30 @@ import java.util.function.Consumer;
  *
  * @param <T> the type of elements stored in the tree
  */
-public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
+public abstract class BinaryTree<T extends Comparable<T>> implements Tree<T> {
 
-    protected Node<T> root; // The root node of the tree
-    protected int size; // The number of nodes in the tree
+    /**
+     * The root node of the tree
+     */
+    protected Node<T> root;
+    /**
+     * The number of nodes in the tree
+     */
+    protected int size;
+
+    /**
+     * A boolean flag indicating whether to use the recursive approach or not.
+     * <p>
+     * When this flag is set to {@code true}, certain methods in the tree class, like insert, delete, and find,
+     * will use a recursive implementation. Conversely, when it is set to {@code false}, the iterative approach will be used.
+     * The choice of using a recursive or iterative approach may affect the performance and memory usage of the tree operations.
+     * </p>
+     * <p>
+     * By default, the value of this flag is set to {@code true}, meaning the recursive approach is used.
+     * Users of the tree class can modify this flag to change the behavior of tree operations accordingly.
+     * </p>
+     */
+    protected boolean useRecursiveApproach;
 
     /**
      * Constructs a new binary tree with no elements.
@@ -20,8 +37,125 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
     public BinaryTree() {
         root = null;
         size = 0;
+        useRecursiveApproach = true;
     }
 
+    /**
+     * Helper method that prints the nodes of the binary tree to a StringBuilder
+     * in a vertical format.
+     *
+     * @param nodes    the list of nodes to print
+     * @param level    the current level of the tree
+     * @param maxLevel the maximum level of the tree
+     * @param sb       the StringBuilder used to store the string representation of the tree
+     */
+    private static <T extends Comparable<T>> void printNodeInternal(List<Node<T>> nodes, int level, int maxLevel, StringBuilder sb) {
+        // Stop printing if the list of nodes is empty or all elements are null
+        if (nodes.isEmpty() || isAllElementsNull(nodes)) return;
+
+        // Calculate the number of edge lines and spaces for this level of the tree
+        int floor = maxLevel - level;
+        int edgeLines = (int) Math.pow(2, (Math.max(floor - 1, 0)));
+        int firstSpaces = (int) Math.pow(2, (floor)) - 1;
+        int betweenSpaces = (int) Math.pow(2, (floor + 1)) - 1;
+
+        // Add the necessary first spaces to the StringBuilder
+        appendWhitespaces(firstSpaces, sb);
+
+        // Create a new list to store the child nodes for the next level of the tree
+        List<Node<T>> newNodes = new ArrayList<>();
+
+        // Iterate through the nodes in the current level
+        for (Node<T> node : nodes) {
+            if (node != null) {
+                // Append the value of the node to the StringBuilder
+                sb.append(node.getValue());
+
+                // Add the child nodes of the current node to the new list
+                newNodes.add(node.getLeft());
+                newNodes.add(node.getRight());
+            } else {
+                // If the current node is null,
+                // add two null nodes and a space to the new list
+                // and append a space to the StringBuilder
+                newNodes.add(null);
+                newNodes.add(null);
+                sb.append(" ");
+            }
+
+            // Add the necessary between spaces to the StringBuilder
+            appendWhitespaces(betweenSpaces, sb);
+        }
+
+        // Append a newline character to the StringBuilder
+        sb.append("\n");
+
+        // Iterate through the edge lines for this level of the tree
+        for (int i = 1; i <= edgeLines; i++) {
+            // Iterate through the nodes in the current level
+            for (Node<T> node : nodes) {
+                // Add the necessary spaces before the edge symbol
+                appendWhitespaces(firstSpaces - i, sb);
+
+                // Print the left-edge symbol if there is a left child node, otherwise add a space
+                if (node == null) {
+                    appendWhitespaces(edgeLines + edgeLines + i + 1, sb);
+                    continue;
+                }
+                if (node.getLeft() != null) sb.append("/");
+                else appendWhitespaces(1, sb);
+
+                // Add the necessary spaces between the edge symbols
+                appendWhitespaces(i + i - 1, sb);
+
+                // Print the right-edge symbol if there is a right child node, otherwise add a space
+                if (node.getRight() != null) sb.append("\\");
+                else appendWhitespaces(1, sb);
+
+                // Add the necessary spaces after the edge symbol
+                appendWhitespaces(edgeLines + edgeLines - i, sb);
+            }
+
+            // Append a newline character to the StringBuilder
+            sb.append("\n");
+        }
+
+        // Recursively print the child nodes for the next level of the tree
+        printNodeInternal(newNodes, level + 1, maxLevel, sb);
+    }
+
+    /**
+     * Appends the specified number of spaces to the StringBuilder.
+     *
+     * @param count the number spaces to append
+     * @param sb    the StringBuilder to append the spaces to
+     */
+    private static void appendWhitespaces(int count, StringBuilder sb) {
+        sb.append(" ".repeat(Math.max(0, count)));
+    }
+
+    /**
+     * Checks if all the elements in the specified list are null.
+     *
+     * @param list the list to check
+     * @return true if all elements in the list are null, false otherwise
+     */
+    private static boolean isAllElementsNull(List<?> list) {
+        for (Object object : list) {
+            if (object != null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Checks if the tree contains a node with the given value.
+     *
+     * @param value the value to search for
+     * @return true if the tree contains a node with the given value, false otherwise
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
+     */
     @Override
     public boolean contains(T value) {
         return find(value) != null;
@@ -32,10 +166,12 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
      *
      * @param value the value to search for
      * @return the node with the specified value, or null if it is not found
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
      */
     @Override
     public Node<T> find(T value) {
-        return find(root, value);
+        if (useRecursiveApproach) return findRecursive(root, value);
+        else return findIterative(root, value);
     }
 
     /**
@@ -44,44 +180,80 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
      * @param node  the root node of the current subtree
      * @param value the value to search for
      * @return the node with the specified value in the subtree, or null if it is not found
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
      */
-    private Node<T> find(Node<T> node, T value) {
+    private Node<T> findRecursive(Node<T> node, T value) {
         if (node == null) {
             return null;
         } else if (node.getValue().equals(value)) {
             return node;
         } else {
-            Node<T> left = find(node.getLeft(), value);
-            Node<T> right = find(node.getRight(), value);
+            Node<T> left = findRecursive(node.getLeft(), value);
+            Node<T> right = findRecursive(node.getRight(), value);
             if (left != null) {
                 return left;
-            } else if (right != null) {
-                return right;
-            } else {
-                return null;
-            }
+            } else return right;
         }
     }
 
     /**
-     * Counts the number of occurrences of the specified value in the tree.
+     * Iteratively finds the node with the specified value in the tree.
      *
-     * @param value the value to count
-     * @return the number of occurrences of the value in the tree
+     * @param root  the root node of the current subtree
+     * @param value the value to search for
+     * @return the node with the specified value in the subtree, or null if it is not found
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
      */
-    @Override
-    public int count(T value) {
-        return count(root, value);
+    private Node<T> findIterative(Node<T> root, T value) {
+        if (root == null) {
+            return null;
+        }
+
+        Deque<Node<T>> stack = new LinkedList<>();
+        stack.push(root);
+
+        while (!stack.isEmpty()) {
+            Node<T> current = stack.pop();
+            if (current.getValue().equals(value)) {
+                return current;
+            }
+
+            // Push the right child first to ensure the left child is processed first
+            if (current.getRight() != null) {
+                stack.push(current.getRight());
+            }
+
+            // Push the left child
+            if (current.getLeft() != null) {
+                stack.push(current.getLeft());
+            }
+        }
+
+        return null;
     }
 
     /**
-     * Recursive helper method for counting the number of occurrences of the specified value in the tree.
+     * Counts the number of occurrences for the specified value in the tree.
+     *
+     * @param value the value to count
+     * @return the number of occurrences for the value in the tree
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
+     */
+    @Override
+    public int count(T value) {
+        if (useRecursiveApproach) return countRecursive(root, value);
+        else return countIterative(root, value);
+    }
+
+    /**
+     * Recursive helper method for counting the number of occurrences for the specified value in the tree.
      *
      * @param node  the root node of the current subtree
      * @param value the value to count
-     * @return the number of occurrences of the value in the subtree
+     * @return the number of occurrences for the value in the subtree
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
      */
-    private int count(Node<T> node, T value) {
+    private int countRecursive(Node<T> node, T value) {
         if (node == null) {
             return 0;
         } else {
@@ -89,27 +261,102 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
             if (node.getValue().equals(value)) {
                 count++;
             }
-            count += count(node.getLeft(), value);
-            count += count(node.getRight(), value);
+            count += countRecursive(node.getLeft(), value);
+            count += countRecursive(node.getRight(), value);
             return count;
         }
+    }
+
+    /**
+     * Iterative helper method
+     * for counting the number of occurrences for the specified value in the subtree rooted at the given node.
+     *
+     * @param node  the root node of the current subtree
+     * @param value the value to count
+     * @return the number of occurrences for the value in the subtree
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
+     */
+    private int countIterative(Node<T> node, T value) {
+        int count = 0;
+
+        if (node == null) {
+            return count;
+        }
+
+        Stack<Node<T>> stack = new Stack<>();
+        stack.push(node);
+
+        while (!stack.isEmpty()) {
+            Node<T> current = stack.pop();
+            if (current.getValue().equals(value)) {
+                count++;
+            }
+
+            if (current.getLeft() != null) {
+                stack.push(current.getLeft());
+            }
+
+            if (current.getRight() != null) {
+                stack.push(current.getRight());
+            }
+        }
+
+        return count;
     }
 
     /**
      * Performs a pre-order traversal of the tree and applies the specified action to each node.
      *
      * @param action the action to apply to each node
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
      */
     @Override
     public void preOrder(Consumer<T> action) {
-        preOrder(root, action);
+        if (useRecursiveApproach) preOrderRecursive(root, action);
+        else preOrderIterative(root, action);
     }
 
-    private void preOrder(Node<T> node, Consumer<T> action) {
+    /**
+     * Recursive method for performing a pre-order traversal and applying an action on each node.
+     *
+     * @param node   the root node of the current subtree
+     * @param action the action to perform on each node
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
+     */
+    private void preOrderRecursive(Node<T> node, Consumer<T> action) {
         if (node != null) {
             action.accept(node.getValue());
-            preOrder(node.getLeft(), action);
-            preOrder(node.getRight(), action);
+            preOrderRecursive(node.getLeft(), action);
+            preOrderRecursive(node.getRight(), action);
+        }
+    }
+
+    /**
+     * Iterative method for performing a pre-order traversal and applying an action on each node.
+     *
+     * @param node   the root node of the current subtree
+     * @param action the action to perform on each node
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
+     */
+    private void preOrderIterative(Node<T> node, Consumer<T> action) {
+        if (node == null) {
+            return;
+        }
+
+        Stack<Node<T>> stack = new Stack<>();
+        stack.push(node);
+
+        while (!stack.isEmpty()) {
+            Node<T> current = stack.pop();
+            action.accept(current.getValue());
+
+            if (current.getRight() != null) {
+                stack.push(current.getRight());
+            }
+
+            if (current.getLeft() != null) {
+                stack.push(current.getLeft());
+            }
         }
     }
 
@@ -117,17 +364,53 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
      * Performs an in-order traversal of the tree and applies the specified action to each node.
      *
      * @param action the action to apply to each node
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
      */
     @Override
     public void inOrder(Consumer<T> action) {
-        inOrder(root, action);
+        if (useRecursiveApproach) inOrderRecursive(root, action);
+        else inOrderIterative(root, action);
     }
 
-    private void inOrder(Node<T> node, Consumer<T> action) {
+    /**
+     * Recursive method for performing an in-order traversal and applying an action on each node.
+     *
+     * @param node   the root node of the current subtree
+     * @param action the action to perform on each node
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
+     */
+    private void inOrderRecursive(Node<T> node, Consumer<T> action) {
         if (node != null) {
-            inOrder(node.getLeft(), action);
+            inOrderRecursive(node.getLeft(), action);
             action.accept(node.getValue());
-            inOrder(node.getRight(), action);
+            inOrderRecursive(node.getRight(), action);
+        }
+    }
+
+    /**
+     * Iterative method for performing an in-order traversal and applying an action on each node.
+     *
+     * @param node   the root node of the current subtree
+     * @param action the action to perform on each node
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
+     */
+    private void inOrderIterative(Node<T> node, Consumer<T> action) {
+        if (node == null) {
+            return;
+        }
+
+        Stack<Node<T>> stack = new Stack<>();
+        Node<T> current = node;
+
+        while (current != null || !stack.isEmpty()) {
+            while (current != null) {
+                stack.push(current);
+                current = current.getLeft();
+            }
+
+            current = stack.pop();
+            action.accept(current.getValue());
+            current = current.getRight();
         }
     }
 
@@ -135,17 +418,60 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
      * Performs a post-order traversal of the tree and applies the specified action to each node.
      *
      * @param action the action to apply to each node
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
      */
     @Override
     public void postOrder(Consumer<T> action) {
-        postOrder(root, action);
+        if (useRecursiveApproach) postOrderRecursive(root, action);
+        else postOrderIterative(root, action);
     }
 
-    private void postOrder(Node<T> node, Consumer<T> action) {
+    /**
+     * Recursive method for performing a post-order traversal and applying an action on each node.
+     *
+     * @param node   the root node of the current subtree
+     * @param action the action to perform on each node
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
+     */
+    private void postOrderRecursive(Node<T> node, Consumer<T> action) {
         if (node != null) {
-            postOrder(node.getLeft(), action);
-            postOrder(node.getRight(), action);
+            postOrderRecursive(node.getLeft(), action);
+            postOrderRecursive(node.getRight(), action);
             action.accept(node.getValue());
+        }
+    }
+
+    /**
+     * Iterative method for performing a post-order traversal and applying an action on each node.
+     *
+     * @param node   the root node of the current subtree
+     * @param action the action to perform on each node
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
+     */
+    private void postOrderIterative(Node<T> node, Consumer<T> action) {
+        if (node == null) {
+            return;
+        }
+
+        Stack<Node<T>> stack1 = new Stack<>();
+        Stack<Node<T>> stack2 = new Stack<>();
+        stack1.push(node);
+
+        while (!stack1.isEmpty()) {
+            Node<T> current = stack1.pop();
+            stack2.push(current);
+
+            if (current.getLeft() != null) {
+                stack1.push(current.getLeft());
+            }
+
+            if (current.getRight() != null) {
+                stack1.push(current.getRight());
+            }
+        }
+
+        while (!stack2.isEmpty()) {
+            action.accept(stack2.pop().getValue());
         }
     }
 
@@ -153,19 +479,68 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
      * Returns the maximum depth of the tree.
      *
      * @return the maximum depth of the tree
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
      */
     @Override
     public int getDepth() {
-        return getDepth(root);
+        if (useRecursiveApproach) return getDepthRecursive(root);
+        else return getDepthIterative(root);
     }
 
-    private int getDepth(Node<T> node) {
+    /**
+     * Calculates the depth of the binary tree starting from the specified node using a Recursive approach.
+     *
+     * @param node the root node of the current subtree
+     * @return the depth of the subtree, or 0 if the node is null
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
+     */
+    private int getDepthRecursive(Node<T> node) {
         if (node == null) {
             return -1;
         }
-        int leftDepth = getDepth(node.getLeft());
-        int rightDepth = getDepth(node.getRight());
+        int leftDepth = getDepthRecursive(node.getLeft());
+        int rightDepth = getDepthRecursive(node.getRight());
         return Math.max(leftDepth, rightDepth) + 1;
+    }
+
+    /**
+     * Calculates the depth of the binary tree starting from the specified node using an iterative approach.
+     *
+     * @param node the root node of the current subtree
+     * @return the depth of the subtree, or 0 if the node is null
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
+     */
+    private int getDepthIterative(Node<T> node) {
+        if (node == null) {
+            return 0;
+        }
+
+        Queue<Node<T>> queue = new LinkedList<>();
+        queue.add(node);
+        int depth = 0;
+
+        while (!queue.isEmpty()) {
+            int levelSize = queue.size();
+
+            // Process nodes at the current level and enqueue their children for the next level
+            for (int i = 0; i < levelSize; i++) {
+                Node<T> current = queue.poll();
+
+                assert current != null;
+                if (current.getLeft() != null) {
+                    queue.add(current.getLeft());
+                }
+
+                if (current.getRight() != null) {
+                    queue.add(current.getRight());
+                }
+            }
+
+            // Increment the depth for each level processed
+            depth++;
+        }
+
+        return depth;
     }
 
     /**
@@ -185,36 +560,10 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
     }
 
     /**
-     * Searches the tree for a node with the specified value and returns it.
-     *
-     * @param value the value to search for
-     * @return the node with the specified value, or null if it is not found
-     */
-    @Override
-    public Node<T> search(T value) {
-        Stack<Node<T>> stack = new Stack<>();
-        stack.push(root);
-        while (!stack.isEmpty()) {
-            Node<T> node = stack.pop();
-            if (node.getValue().equals(value)) {
-                return node;
-            } else {
-                if (node.getLeft() != null) {
-                    stack.push(node.getLeft());
-                }
-                if (node.getRight() != null) {
-                    stack.push(node.getRight());
-                }
-            }
-        }
-        return null;
-    }
-
-
-    /**
      * Returns the node with the minimum value in the tree.
      *
      * @return the node with the minimum value in the tree, or null if the tree is empty
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
      */
     @Override
     public Node<T> getMin() {
@@ -229,6 +578,7 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
      *
      * @param node the root node of the current subtree
      * @return the node with the minimum value in the subtree, or null if the subtree is empty
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
      */
     private Node<T> getMin(Node<T> node) {
         if (node == null) {
@@ -251,6 +601,7 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
      * Returns the node with the maximum value in the tree.
      *
      * @return the node with the maximum value in the tree, or null if the tree is empty
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
      */
     @Override
     public Node<T> getMax() {
@@ -260,11 +611,24 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
         return getMax(root);
     }
 
+    @Override
+    abstract public Node<T> getSuccessor(Node<T> node);
+
+    @Override
+    abstract public Node<T> getPredecessor(Node<T> node);
+
+    @Override
+    abstract public boolean insert(T value);
+
+    @Override
+    abstract public boolean delete(T value);
+
     /**
      * Recursive helper method for finding the node with the maximum value in the tree.
      *
      * @param node the root node of the current subtree
      * @return the node with the maximum value in the subtree, or null if the subtree is empty
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
      */
     private Node<T> getMax(Node<T> node) {
         if (node == null) {
@@ -284,175 +648,6 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
     }
 
     /**
-     * Inserts a new node with the specified value into the tree.
-     *
-     * @param value the value to insert
-     * @return true if the value was inserted, or false if it already exists in the tree
-     */
-    @Override
-    public boolean insert(T value) {
-        Node<T> newNode = new Node<>(value);
-
-        // If the tree is empty, set the root node to be the new node
-        if (root == null) {
-            root = newNode;
-            size++;
-            return true;
-        }
-
-        // Traverse the tree to find the correct position to insert the new node
-        Node<T> current = root;
-        while (true) {
-            int cmp = current.getValue().compareTo(value);
-            if (cmp == 0) {
-                // The value already exists in the tree, so return false
-                return false;
-            } else if (cmp > 0) {
-                // The value is less than the current node's value, so move to the left subtree
-                if (current.getLeft() == null) {
-                    current.setLeft(newNode);
-                    break;
-                } else {
-                    current = current.getLeft();
-                }
-            } else {
-                // The value is greater than the current node's value, so move to the right subtree
-                if (current.getRight() == null) {
-                    current.setRight(newNode);
-                    break;
-                } else {
-                    current = current.getRight();
-                }
-            }
-        }
-
-        // Increment the size of the tree and return true
-        size++;
-        return true;
-    }
-
-    /**
-     * Removes the node with the specified value from the tree.
-     *
-     * @param value the value to remove
-     * @return true if the node was found and removed, false otherwise
-     */
-    @Override
-    public boolean delete(T value) {
-        Node<T> parent = null;
-        Node<T> current = root;
-        while (current != null) {
-            int cmp = current.getValue().compareTo(value);
-            if (cmp == 0) {
-                // The node has been found, so remove it
-                if (current.getLeft() == null && current.getRight() == null) {
-                    // Case 1: node has no children
-                    if (parent == null) {
-                        root = null;
-                    } else if (parent.getLeft() == current) {
-                        parent.setLeft(null);
-                    } else {
-                        parent.setRight(null);
-                    }
-                } else if (current.getLeft() == null) {
-                    // Case 2: node has one child (right)
-                    if (parent == null) {
-                        root = current.getRight();
-                    } else if (parent.getLeft() == current) {
-                        parent.setLeft(current.getRight());
-                    } else {
-                        parent.setRight(current.getRight());
-                    }
-                } else if (current.getRight() == null) {
-                    // Case 2: node has one child (left)
-                    if (parent == null) {
-                        root = current.getLeft();
-                    } else if (parent.getLeft() == current) {
-                        parent.setLeft(current.getLeft());
-                    } else {
-                        parent.setRight(current.getLeft());
-                    }
-                } else {
-                    // Case 3: node has two children
-                    Node<T> successor = getSuccessor(current);
-                    current.setValue(successor.getValue());
-                    delete(successor.getValue());
-                }
-                size--;
-                return true;
-            } else if (cmp > 0) {
-                // The value to be deleted is less than the value at the current node, so move to the left subtree
-                parent = current;
-                current = current.getLeft();
-            } else {
-                // The value to be deleted is greater than the value at the current node, so move to the right subtree
-                parent = current;
-                current = current.getRight();
-            }
-        }
-        // The value to be deleted was not found in the tree
-        return false;
-    }
-
-    /**
-     * Finds the successor of the specified node in the tree.
-     *
-     * @param node the node to find the successor of
-     * @return the successor of the node
-     */
-    public Node<T> getSuccessor(Node<T> node) {
-        if (node == null) {
-            return null;
-        }
-        if (node.getRight() != null) {
-            // If the node has a right subtree, the successor is the node with the minimum value in that subtree
-            Node<T> current = node.getRight();
-            while (current.getLeft() != null) {
-                current = current.getLeft();
-            }
-            return current;
-        } else {
-            // If the node does not have a right subtree, we need to go up the tree until we find the first ancestor that is a left child of its parent
-            Node<T> current = node;
-            Node<T> parent = node.getParent();
-            while (parent != null && current == parent.getRight()) {
-                current = parent;
-                parent = parent.getParent();
-            }
-            return parent;
-        }
-    }
-
-    /**
-     * Finds the predecessor of the specified node in the tree.
-     *
-     * @param node the node to find the predecessor of
-     * @return the predecessor of the node
-     */
-    public Node<T> getPredecessor(Node<T> node) {
-        if (node == null) {
-            return null;
-        }
-        if (node.getLeft() != null) {
-            // If the node has a left subtree, the predecessor is the node with the maximum value in that subtree
-            Node<T> current = node.getLeft();
-            while (current.getRight() != null) {
-                current = current.getRight();
-            }
-            return current;
-        } else {
-            // If the node does not have a left subtree, we need to go up the tree until we find the first ancestor that is a right child of its parent
-            Node<T> current = node;
-            Node<T> parent = node.getParent();
-            while (parent != null && current == parent.getLeft()) {
-                current = parent;
-                parent = parent.getParent();
-            }
-            return parent;
-        }
-    }
-
-    /**
      * Returns the number of nodes in the tree.
      *
      * @return the number of nodes in the tree
@@ -466,6 +661,7 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
      *
      * @param node the root of the subtree
      * @return the number of nodes in the subtree
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
      */
     private int countNodes(Node<T> node) {
         if (node == null) {
@@ -479,6 +675,7 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
      * Returns false otherwise.
      *
      * @return true if the binary tree is strict, false otherwise
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
      */
     public boolean isStrict() {
         return isStrict(root);
@@ -490,6 +687,7 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
      *
      * @param node the root of the subtree to check
      * @return true if the subtree is strict, false otherwise
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
      */
     private boolean isStrict(Node<T> node) {
         if (node == null) {
@@ -507,12 +705,12 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
         }
     }
 
-
     /**
      * Returns true if the binary tree is complete, i.e., all levels of the tree are completely filled except possibly
      * the last level, which is filled from left to right. Returns false otherwise.
      *
      * @return true if the binary tree is complete, false otherwise
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
      */
     public boolean isComplete() {
         return isComplete(root, 0, size);
@@ -527,6 +725,7 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
      * @param index   the index of the node in the tree, starting from 0 for the root
      * @param maxsize the maximum number of nodes that can be in the subtree, including the root
      * @return true if the subtree is complete, false otherwise
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
      */
     private boolean isComplete(Node<T> node, int index, int maxsize) {
         if (node == null) {
@@ -538,14 +737,14 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
             return false;
         }
         // Recursively check the left and right subtrees
-        return isComplete(node.getLeft(), 2 * index + 1, maxsize)
-                && isComplete(node.getRight(), 2 * index + 2, maxsize);
+        return isComplete(node.getLeft(), 2 * index + 1, maxsize) && isComplete(node.getRight(), 2 * index + 2, maxsize);
     }
 
     /**
      * Checks whether the binary tree is a full binary tree.
      *
      * @return true if the binary tree is a full binary tree, false otherwise
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
      */
     public boolean isFull() {
         return isFull(root);
@@ -568,6 +767,7 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
      * Returns the maximum height of the tree.
      *
      * @return the maximum height of the tree
+     * @implNote This method has a time complexity of O(1)
      */
     public int getMaxHeight() {
         return size() - 1;
@@ -577,6 +777,7 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
      * Returns the minimum height of the tree.
      *
      * @return the minimum height of the tree
+     * @implNote This method has a time complexity of O(1)
      */
     public int getMinHeight() {
         return (int) Math.floor(Math.log(size() + 1) / Math.log(2));
@@ -586,6 +787,7 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
      * Returns the minimum number of nodes in a binary tree of the same height as the tree.
      *
      * @return the minimum number of nodes in a binary tree of the same height as the tree
+     * @implNote This method has a time complexity of O(1)
      */
     public int getMinNodes() {
         return (int) Math.pow(2, getMinHeight()) - 1;
@@ -597,6 +799,7 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
      * @param <TP> the type of the value stored in the node
      * @param node the root of the tree
      * @return the number of nodes in the tree
+     * @implNote This method has a time complexity of O(log(n))
      */
     public <TP extends Comparable<T>> int countNodesCompleteBT(Node<T> node) {
         if (node == null) {
@@ -616,7 +819,7 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
     }
 
     /**
-     * Returns the height of the left subtree of the given node.
+     * Returns the height of the left subtree for the given node.
      *
      * @param <TP> the type of the value stored in the node
      * @param node the root of the subtree
@@ -632,7 +835,7 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
     }
 
     /**
-     * Returns the height of the right subtree of the given node.
+     * Returns the height of the right subtree for the given node.
      *
      * @param <TP> the type of the value stored in the node
      * @param node the root of the subtree
@@ -651,6 +854,7 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
      * Returns the number of leaves (i.e., nodes with no children) in the tree.
      *
      * @return the number of leaves in the tree
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
      */
     public int countLeaves() {
         return countLeaves(root);
@@ -670,6 +874,7 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
      * Returns the number of non-leaf nodes (i.e., nodes with at least one child) in the tree.
      *
      * @return the number of non-leaf nodes in the tree
+     * @implNote This method has a time complexity of O(n), where n is the number of nodes in the tree.
      */
     public int countNonLeaves() {
         return countNonLeaves(root);
@@ -688,23 +893,12 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
      *
      * @return true if the tree is a binary search tree, false otherwise
      */
-    public boolean isBST() {
+    public boolean isBST(T min, T max) {
         if (root == null) {
             return true;
         } else {
-            return isBST(root, null, null);
+            return isBST(root, min, max);
         }
-        /*if (root.getValue() instanceof Integer) {
-            return isBST(root, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        } else if (root.getValue() instanceof Character) {
-            return isBST(root, 'a', 'z');
-        } else if (root.getValue() instanceof String) {
-            return isBST(root, "apple", "zebra");
-        } else if (root.getValue() instanceof Float) {
-            return isBST(root, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY);
-        } else {
-            throw new IllegalArgumentException("Unsupported data type");
-        }*/
     }
 
     /**
@@ -712,15 +906,14 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
      *
      * @param node the root of the subtree to check
      * @param min  the minimum value that nodes in the subtree can have
-     * @param max  the maximum value that nodes in the subtree can have
+     * @param max  the maximum value that node in the subtree can have
      * @return true if the subtree is a binary search tree, false otherwise
      */
     private boolean isBST(Node<T> node, T min, T max) {
         if (node == null) {
             return true;
         }
-        if ((min != null && node.getValue().compareTo(min) <= 0) ||
-                (max != null && node.getValue().compareTo(max) >= 0)) {
+        if ((min != null && node.getValue().compareTo(min) <= 0) || (max != null && node.getValue().compareTo(max) >= 0)) {
             return false;
         }
         return isBST(node.getLeft(), min, node.getValue()) && isBST(node.getRight(), node.getValue(), max);
@@ -734,7 +927,7 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
      * @param root the root node of the tree to print
      */
     public String printTree(Node<T> root) {
-        // Clear the console before printing the tree
+        // Clears the console before printing the tree
 //        try {
 //            new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
 //        } catch (Exception e) {
@@ -742,134 +935,32 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
 //        }
 
         // Get the maximum depth of the tree
-        int maxLevel = getDepth(root) + 1;
-
+        int maxLevel;
+        if (useRecursiveApproach) maxLevel = getDepthRecursive(root) + 1;
+        else maxLevel = getDepthIterative(root) + 1;
         // Create a StringBuilder to store the string representation of the tree
         StringBuilder sb = new StringBuilder();
 
         // Print the nodes of the tree in a vertical format
         printNodeInternal(Collections.singletonList(root), 1, maxLevel, sb);
 
-        // Returning  the StringBuilder to the toString function
+        // Returning the StringBuilder to the toString function
         return sb.toString();
     }
 
     /**
-     * Helper method that prints the nodes of the binary tree to a StringBuilder
-     * in a vertical format.
+     * Sets the approach to use for certain operations in the binary tree.
      *
-     * @param nodes    the list of nodes to print
-     * @param level    the current level of the tree
-     * @param maxLevel the maximum level of the tree
-     * @param sb       the StringBuilder used to store the string representation of the tree
+     * @param useRecursiveApproach true to use the recursive approach, false to use the iterative approach
+     * @implNote By default, the binary tree uses the recursive approach for operations. Setting this flag to false
+     * will switch to the iterative approach, which may affect the performance and memory usage of the tree operations.
      */
-    private static <T extends Comparable<T>> void printNodeInternal(List<Node<T>> nodes, int level, int maxLevel, StringBuilder sb) {
-        // Stop printing if the list of nodes is empty or all elements are null
-        if (nodes.isEmpty() || isAllElementsNull(nodes))
-            return;
-
-        // Calculate the number of edge lines and spaces for this level of the tree
-        int floor = maxLevel - level;
-        int edgeLines = (int) Math.pow(2, (Math.max(floor - 1, 0)));
-        int firstSpaces = (int) Math.pow(2, (floor)) - 1;
-        int betweenSpaces = (int) Math.pow(2, (floor + 1)) - 1;
-
-        // Add the necessary first spaces to the StringBuilder
-        appendWhitespaces(firstSpaces, sb);
-
-        // Create a new list to store the child nodes for the next level of the tree
-        List<Node<T>> newNodes = new ArrayList<Node<T>>();
-
-        // Iterate through the nodes in the current level
-        for (Node<T> node : nodes) {
-            if (node != null) {
-                // Append the value of the node to the StringBuilder
-                sb.append(node.getValue());
-
-                // Add the child nodes of the current node to the new list
-                newNodes.add(node.getLeft());
-                newNodes.add(node.getRight());
-            } else {
-                // If the current node is null, add two null nodes and a space to the new list and append a space to the StringBuilder
-                newNodes.add(null);
-                newNodes.add(null);
-                sb.append(" ");
-            }
-
-            // Add the necessary between spaces to the StringBuilder
-            appendWhitespaces(betweenSpaces, sb);
-        }
-
-        // Append a newline character to the StringBuilder
-        sb.append("\n");
-
-        // Iterate through the edge lines for this level of the tree
-        for (int i = 1; i <= edgeLines; i++) {
-            // Iterate through the nodes in the current level
-            for (int j = 0; j < nodes.size(); j++) {
-                // Add the necessary spaces before the edge symbol
-                appendWhitespaces(firstSpaces - i, sb);
-
-                // Print the left edge symbol if there is a left child node, otherwise add a space
-                if (nodes.get(j) == null) {
-                    appendWhitespaces(edgeLines + edgeLines + i + 1, sb);
-                    continue;
-                }
-                if (nodes.get(j).getLeft() != null)
-                    sb.append("/");
-                else
-                    appendWhitespaces(1, sb);
-
-                // Add the necessary spaces between the edge symbols
-                appendWhitespaces(i + i - 1, sb);
-
-                // Print the right edge symbol if there is a right child node, otherwise add a space
-                if (nodes.get(j).getRight() != null)
-                    sb.append("\\");
-                else
-                    appendWhitespaces(1, sb);
-
-                // Add the necessary spaces after the edge symbol
-                appendWhitespaces(edgeLines + edgeLines - i, sb);
-            }
-
-            // Append a newline character to the StringBuilder
-            sb.append("\n");
-        }
-
-        // Recursively print the child nodes for the next level of the tree
-        printNodeInternal(newNodes, level + 1, maxLevel, sb);
-    }
-
-    /**
-     * Appends the specified number of spaces to the StringBuilder.
-     *
-     * @param count the number ofspaces to append
-     * @param sb    the StringBuilder to append the spaces to
-     */
-    private static void appendWhitespaces(int count, StringBuilder sb) {
-        for (int i = 0; i < count; i++) {
-            sb.append(" ");
-        }
-    }
-
-    /**
-     * Checks if all the elements in the specified list are null.
-     *
-     * @param list the list to check
-     * @return true if all elements in the list are null, false otherwise
-     */
-    private static boolean isAllElementsNull(List<?> list) {
-        for (Object object : list) {
-            if (object != null) {
-                return false;
-            }
-        }
-        return true;
+    public void setUseRecursiveApproach(boolean useRecursiveApproach) {
+        this.useRecursiveApproach = useRecursiveApproach;
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return printTree(root);
     }
 

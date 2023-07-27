@@ -1,5 +1,16 @@
 import java.util.function.Consumer;
 
+/**
+ * The Tree interface represents a generic tree data structure with various operations and traversal methods.
+ * <p>
+ * It defines methods for searching, inserting, deleting nodes, and traversing the tree in different orders.
+ * <p>
+ * The tree is composed of nodes, and each node contains a value of type T which must be comparable.
+ * <p>
+ * This interface is intended to be implemented by classes that provide specific tree implementations, such as binary search trees or AVL trees.
+ *
+ * @param <T> The type of elements stored in the tree, which must implement the Comparable interface.
+ */
 public interface Tree<T extends Comparable<T>> {
     /**
      * Checks if the tree contains a node with the given value.
@@ -57,14 +68,6 @@ public interface Tree<T extends Comparable<T>> {
      * Prints the tree to the console.
      */
     void printTree();
-
-    /**
-     * Searches for the node with the given value in the tree.
-     *
-     * @param value the value to search for
-     * @return the node with the given value, or null if not found
-     */
-    Node<T> search(T value);
 
     /**
      * Returns the minimum node in the tree.
