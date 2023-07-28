@@ -1,6 +1,6 @@
-# TreesAlgorithms
+# TreeAlgorithms
 
-The TreesAlgorithms project is a Java-based repository that provides implementations of various tree data structures and algorithms. It offers a collection of classes for building, manipulating, and traversing trees, as well as performing operations specific to different types of trees.
+The TreeAlgorithms project is a Java-based repository that provides implementations of various tree data structures and algorithms. It offers a collection of classes for building, manipulating, and traversing trees, as well as performing operations specific to different types of trees.
 
 ## Table of Contents
 - [Introduction](#introduction)
@@ -10,7 +10,7 @@ The TreesAlgorithms project is a Java-based repository that provides implementat
 
 ## Introduction
 
-TreesAlgorithms is a Java project that focuses on providing efficient and optimized solutions for working with trees. It offers a set of classes that implement various tree data structures and algorithms, including binary trees, binary search trees, AVL trees, heaps, and priority queues. These classes can be used as a foundation for tree-related tasks in a wide range of applications.
+TreeAlgorithms is a Java project that focuses on providing efficient and optimized solutions for working with trees. It offers a set of classes that implement various tree data structures and algorithms, including binary trees, binary search trees, AVL trees, heaps, and priority queues. These classes can be used as a foundation for tree-related tasks in a wide range of applications.
 
 The project is designed to be easy to understand, well-documented, and flexible, allowing developers to incorporate tree functionalities seamlessly into their Java projects.
 
@@ -34,7 +34,7 @@ The following classes are included in the TreesAlgorithms project:
 
 ## Usage
 
-To use the TreesAlgorithms project in your Java application, follow these steps:
+To use the TreeAlgorithms project in your Java application, follow these steps:
 
 1. Clone or download the repository to your local machine.
 
@@ -46,6 +46,6 @@ To use the TreesAlgorithms project in your Java application, follow these steps:
 
 ## Contributing
 
-Contributions to the TreesAlgorithms project are welcome and encouraged! If you have any ideas, improvements, or bug fixes, please feel free to open an issue or submit a pull request. Make sure to follow the established coding style and guidelines.
+Contributions to the TreeAlgorithms project are welcome and encouraged! If you have any ideas, improvements, or bug fixes, please feel free to open an issue or submit a pull request. Make sure to follow the established coding style and guidelines.
 
 
