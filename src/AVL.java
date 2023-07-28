@@ -101,7 +101,7 @@ public class AVL<T extends Comparable<T>> extends BST<T> {
      * @return the root of the updated subtree
      * @implNote This method has a time complexity of O(log(n))
      */
-    public boolean insertIterative(Node<T> node, T value) {
+    private boolean insertIterative(Node<T> node, T value) {
         Node<T> newNode = new Node<>(value);
         if (node == null) {
             root = newNode;

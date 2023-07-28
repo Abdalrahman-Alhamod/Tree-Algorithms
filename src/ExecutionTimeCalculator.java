@@ -48,7 +48,7 @@ public class ExecutionTimeCalculator {
      *
      * @return The formatted execution time in seconds (e.g., "0.001232 s").
      */
-    public static String getFormattedExecutionTime() {
+    private static String getFormattedExecutionTime() {
         double executionTimeSeconds = executionTime / 1_000_000_000.0; // Convert nanoseconds to seconds
         return String.format(Locale.US, "%.6f s", executionTimeSeconds);
     }

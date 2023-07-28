@@ -86,17 +86,6 @@ public abstract class Heap<T extends Comparable<T>> {
     }
 
     /**
-     * Prints the elements of the heap array.
-     */
-    public void printHeapArray() {
-        System.out.print("Heap Array : ");
-        for (int i = 1; i <= heapSize; i++) {
-            System.out.print(heapArray.get(i) + " ");
-        }
-        System.out.println();
-    }
-
-    /**
      * Prints the elements of the heap as a tree.
      */
     public void printHeapTree() {
@@ -170,6 +159,15 @@ public abstract class Heap<T extends Comparable<T>> {
      */
     public void setUseRecursiveApproach(boolean useRecursiveApproach) {
         this.useRecursiveApproach = useRecursiveApproach;
+    }
+
+    /**
+     * Makes the heap empty
+     */
+    public void clear() {
+        heapArray = new ArrayList<>();
+        heapArray.add(null);
+        heapSize = 0;
     }
 
     public String toString() {

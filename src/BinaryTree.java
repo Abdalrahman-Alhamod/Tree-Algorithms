@@ -39,6 +39,7 @@ public abstract class BinaryTree<T extends Comparable<T>> implements Tree<T> {
         size = 0;
         useRecursiveApproach = true;
     }
+
     /**
      * Constructs a binary tree with the given root node.
      *
@@ -967,6 +968,14 @@ public abstract class BinaryTree<T extends Comparable<T>> implements Tree<T> {
      */
     public void setUseRecursiveApproach(boolean useRecursiveApproach) {
         this.useRecursiveApproach = useRecursiveApproach;
+    }
+
+    /**
+     * Makes the tree empty
+     */
+    public void clear() {
+        root = null;
+        size = 0;
     }
 
     @Override

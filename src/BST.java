@@ -83,7 +83,7 @@ public class BST<T extends Comparable<T>> extends BinaryTree<T> {
      * @return true if the value was inserted, or false if it already exists in the tree
      * @implNote This method has a time complexity of O(h), where h is the height of the subtree.
      */
-    public boolean insertIterative(Node<T> node, T value) {
+    private boolean insertIterative(Node<T> node, T value) {
         Node<T> newNode = new Node<>(value);
 
         // If the tree is empty, set the root node to be the new node
@@ -313,7 +313,7 @@ public class BST<T extends Comparable<T>> extends BinaryTree<T> {
      * @return true if the node was found and removed, false otherwise
      * @implNote This method has a time complexity of O(h), where h is the height of the subtree.
      */
-    public boolean deleteIterative(T value) {
+    private boolean deleteIterative(T value) {
         Node<T> parent = null;
         Node<T> current = root;
         while (current != null) {

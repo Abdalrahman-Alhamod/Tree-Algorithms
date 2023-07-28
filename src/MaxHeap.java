@@ -31,7 +31,7 @@ public class MaxHeap<T extends Comparable<T>> extends Heap<T> {
      * @param index the index to start heapifying from
      * @implNote This method has a time complexity of O(log(n))
      */
-    protected void heapifyDown(int index) {
+    private void heapifyDown(int index) {
         if (useRecursiveApproach)
             heapifyDownRecursive(index);
         else
@@ -46,7 +46,7 @@ public class MaxHeap<T extends Comparable<T>> extends Heap<T> {
      * @param index the index to start heapifying from
      * @implNote This method has a time complexity of O(log(n))
      */
-    protected void heapifyDownRecursive(int index) {
+    private void heapifyDownRecursive(int index) {
         int leftChildIndex = getLeftChildIndex(index);
         int rightChildIndex = getRightChildIndex(index);
         int largest = index;
@@ -74,7 +74,7 @@ public class MaxHeap<T extends Comparable<T>> extends Heap<T> {
      * @param index the index to start heapifying from
      * @implNote This method has a time complexity of O(log(n))
      */
-    protected void heapifyDownIterative(int index) {
+    private void heapifyDownIterative(int index) {
         int current = index;
 
         while (true) {
@@ -108,7 +108,7 @@ public class MaxHeap<T extends Comparable<T>> extends Heap<T> {
      * @param index the index to start heapifying from
      * @implNote This method has a time complexity of O(log(n))
      */
-    protected void heapifyUp(int index) {
+    private void heapifyUp(int index) {
         if (useRecursiveApproach)
             heapifyUpRecursive(index);
         else
@@ -123,7 +123,7 @@ public class MaxHeap<T extends Comparable<T>> extends Heap<T> {
      * @param index the index to start heapifying from
      * @implNote This method has a time complexity of O(log(n))
      */
-    protected void heapifyUpRecursive(int index) {
+    private void heapifyUpRecursive(int index) {
         int parentIndex = getParentIndex(index);
         if (parentIndex >= 1 && heapArray.get(index).compareTo(heapArray.get(parentIndex)) > 0) {
             swap(index, parentIndex);
@@ -139,7 +139,7 @@ public class MaxHeap<T extends Comparable<T>> extends Heap<T> {
      * @param index the index to start heapifying from
      * @implNote This method has a time complexity of O(log(n))
      */
-    protected void heapifyUpIterative(int index) {
+    private void heapifyUpIterative(int index) {
         int current = index;
         int parentIndex;
 
@@ -229,12 +229,13 @@ public class MaxHeap<T extends Comparable<T>> extends Heap<T> {
 
     /**
      * This method builds a max heap from an ArrayList of elements.
-     * It assumes that the ArrayList is a complete binary tree, and starts heapifying from the last non-leaf node to the root.
+     * It assumes that the ArrayList is a complete binary tree,
+     * and starts heapifying from the last non-leaf node to the root.
      *
      * @param array the ArrayList of elements to be transformed into a max heap
      * @implNote This method has a time complexity of O(n)
      */
-    private void buildMaxHeapArray(ArrayList<T> array) {
+    public void buildMaxHeapArray(ArrayList<T> array) {
         // Time Complexity : O(n)
         heapSize = array.size();
         array.add(0, null);

@@ -30,7 +30,7 @@ public class MinHeap<T extends Comparable<T>> extends Heap<T> {
      * @param index the index of the element to heapify
      * @implNote This method has a time complexity of O(log(n))
      */
-    protected void heapifyTopDown(int index) {
+    private void heapifyTopDown(int index) {
         if (useRecursiveApproach)
             heapifyTopDownRecursive(index);
         else
@@ -44,7 +44,7 @@ public class MinHeap<T extends Comparable<T>> extends Heap<T> {
      * @param index the index of the element to heapify
      * @implNote This method has a time complexity of O(log(n))
      */
-    protected void heapifyTopDownRecursive(int index) {
+    private void heapifyTopDownRecursive(int index) {
         int smallest = index;
         int right = getRightChildIndex(index);
         int left = getLeftChildIndex(index);
@@ -65,7 +65,7 @@ public class MinHeap<T extends Comparable<T>> extends Heap<T> {
      * @param index the index of the element to heapify
      * @implNote This method has a time complexity of O(log(n))
      */
-    protected void heapifyTopDownIterative(int index) {
+    private void heapifyTopDownIterative(int index) {
         int current = index;
 
         while (true) {
@@ -110,7 +110,7 @@ public class MinHeap<T extends Comparable<T>> extends Heap<T> {
      * @param index the index of the element to heapify
      * @implNote This method has a time complexity of O(log(n))
      */
-    protected void heapifyBottomUp(int index) {
+    private void heapifyBottomUp(int index) {
         if (useRecursiveApproach)
             heapifyBottomUpRecursive(index);
         else
@@ -124,7 +124,7 @@ public class MinHeap<T extends Comparable<T>> extends Heap<T> {
      * @param index the index of the element to heapify
      * @implNote This method has a time complexity of O(log(n))
      */
-    protected void heapifyBottomUpRecursive(int index) {
+    private void heapifyBottomUpRecursive(int index) {
         if (index != 1 && heapArray.get(index).compareTo(heapArray.get(getParentIndex(index))) < 0) {
             swap(index, getParentIndex(index));
             heapifyBottomUpRecursive(getParentIndex(index));
@@ -138,7 +138,7 @@ public class MinHeap<T extends Comparable<T>> extends Heap<T> {
      * @param index the index of the element to heapify
      * @implNote This method has a time complexity of O(log(n))
      */
-    protected void heapifyBottomUpIterative(int index) throws IndexOutOfBoundsException {
+    private void heapifyBottomUpIterative(int index) throws IndexOutOfBoundsException {
         int current = index;
 
         while (current > 1) {
