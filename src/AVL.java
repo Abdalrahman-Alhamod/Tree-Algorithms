@@ -6,6 +6,21 @@ import java.util.Stack;
  * @param <T> the data type of the elements in the tree
  */
 public class AVL<T extends Comparable<T>> extends BST<T> {
+    /**
+     * Constructs a new AVL tree with no elements.
+     */
+    public AVL() {
+        super();
+    }
+
+    /**
+     * Constructs a AVL tree with the given root node.
+     *
+     * @param root The root node of the AVL tree.
+     */
+    public AVL(Node<T> root) {
+        super(root);
+    }
 
     /**
      * Inserts an element into the AVL tree.

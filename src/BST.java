@@ -2,6 +2,20 @@
  * Binary Search Tree implementation that inherits from BinaryTree class.
  */
 public class BST<T extends Comparable<T>> extends BinaryTree<T> {
+    /**
+     * Constructs a new binary search tree with no elements.
+     */
+    public BST() {
+        super();
+    }
+    /**
+     * Constructs a binary search tree with the given root node.
+     *
+     * @param root The root node of the binary search tree.
+     */
+    public BST(Node<T> root) {
+        super(root);
+    }
 
     /**
      * Inserts an element into the BST.

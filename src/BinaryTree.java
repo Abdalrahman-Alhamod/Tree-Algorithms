@@ -39,6 +39,16 @@ public abstract class BinaryTree<T extends Comparable<T>> implements Tree<T> {
         size = 0;
         useRecursiveApproach = true;
     }
+    /**
+     * Constructs a binary tree with the given root node.
+     *
+     * @param root The root node of the binary tree.
+     */
+    public BinaryTree(Node<T> root) {
+        this.root = root;
+        size = 1;
+        useRecursiveApproach = true;
+    }
 
     /**
      * Helper method that prints the nodes of the binary tree to a StringBuilder
