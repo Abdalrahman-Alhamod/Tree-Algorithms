@@ -6,6 +6,7 @@ The Tree Algorithms project is a Java-based repository that provides implementat
 - [Introduction](#introduction)
 - [Classes](#classes)
 - [Usage](#usage)
+- [Installation](#Installation)
 - [Contributing](#contributing)
 
 ## Introduction
@@ -43,6 +44,14 @@ To use the Tree Algorithms project in your Java application, follow these steps:
 3. Use the classes according to your requirements. Refer to the documentation and examples provided within each class for guidance on using specific functionalities.
 
 4. Compile and run your Java application, ensuring that the necessary dependencies are included.
+
+## Installation
+The following installers are for Tester Console Application for the v1.0.0 only :
+> [Windows 32-bit Installer](https://github.com/Abdalrahman-Alhamod/Tree-Algorithms/releases/download/v1.0.0/Trees_Algorithms_Windows_x32_Installer.exe)
+
+> [Windows 64-bit Installer](https://github.com/Abdalrahman-Alhamod/Tree-Algorithms/releases/download/v1.0.0/Trees_Algorithms_Windows_x64_Installer.exe)
+
+> [Unix Installer](https://github.com/Abdalrahman-Alhamod/Tree-Algorithms/releases/download/v1.0.0/Trees_Algorithms_Unix_Installer.sh)
 
 ## Contributing
 
